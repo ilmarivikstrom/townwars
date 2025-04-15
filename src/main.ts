@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+Math.random();
 
 
 class MainScene extends Phaser.Scene {
@@ -32,16 +33,31 @@ class MainScene extends Phaser.Scene {
   private drawNodes(): void {
     this.graphics.clear();
     this.graphics.fillStyle(0xffffff, 1);
-    for (const node of this.nodes) {
+    this.graphics.lineStyle(5, 0xffffff);
+    for (const [i, node] of this.nodes.entries()) {
       this.graphics.fillCircle(node.x, node.y, node.radius);
+      for (const second_node of this.randomSet(this.nodes, 1)) {
+        this.graphics.lineBetween(node.x, node.y, second_node.x, second_node.y);
+      }
     }
+  }
+
+  private randomSet(elementList: Phaser.Geom.Circle[], n: number) : Phaser.Geom.Circle[] {
+    const randomNodes: Phaser.Geom.Circle[] = [];
+    for (let i=0; i<n; i++) {
+      randomNodes.push(elementList[Math.floor(Math.random() * elementList.length)]);
+    }
+    return randomNodes;
+  }
+
+  private pickRandom(elementList: Phaser.Geom.Circle[]): Phaser.Geom.Circle {
+    return elementList[Math.floor(Math.random() * elementList.length)];
   }
 
 
   public update(timestep: number, dt: number): void {
     this.timeDisplay.setText("Time: " + (timestep / 1000).toFixed(2) + "s, " + "dt: " + (dt).toFixed(2) + "ms");
     console.log("Length of nodes: " + this.nodes.length.toString());
-    this.drawNodes();
   }
 }
 
