@@ -14,7 +14,6 @@ export default class GameScene extends Phaser.Scene {
   public preload(): void {}
 
   public create(): void {
-    this.input.mouse?.disableContextMenu();
     this.graphics = this.add.graphics();
 
     this.debugDisplaySystem = new DebugDisplaySystem(this);
