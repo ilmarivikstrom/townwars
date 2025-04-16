@@ -38,7 +38,7 @@ main {
 }
 
 #gameCanvas {
-  border: 1px solid #5500ff;
+  border: 1px solid #444444;
   position: absolute;
   top: 50%;
   left: 50%;
