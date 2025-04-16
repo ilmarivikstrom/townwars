@@ -1,9 +1,11 @@
 import Phaser from "phaser";
+import DebugDisplaySystem from "../systems/DebugDisplaySystem.js";
 
 export default class GameScene extends Phaser.Scene {
-  private timeDisplay!: Phaser.GameObjects.Text;
   private nodes: Phaser.Geom.Circle[] = [];
   private graphics!: Phaser.GameObjects.Graphics;
+  private pointerCoords: Phaser.Geom.Point = new Phaser.Geom.Point(-1, -1);
+  private debugDisplaySystem!: DebugDisplaySystem;
 
   public constructor() {
     super("GameScene");
@@ -15,13 +17,7 @@ export default class GameScene extends Phaser.Scene {
     this.input.mouse?.disableContextMenu();
     this.graphics = this.add.graphics();
 
-    this.timeDisplay = this.add.text(24, 24, "", {
-      backgroundColor: "#222222",
-      color: "#ffffff",
-      padding: { x: 12, y: 12 },
-      lineSpacing: 6,
-    });
-    this.timeDisplay.setDepth(1);
+    this.debugDisplaySystem = new DebugDisplaySystem(this);
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.button === 0) {
@@ -31,6 +27,11 @@ export default class GameScene extends Phaser.Scene {
         this.drawNodeGraph();
         console.log("Length of nodes: " + this.nodes.length.toString());
       }
+    });
+
+    this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
+      this.pointerCoords.x = pointer.x;
+      this.pointerCoords.y = pointer.y;
     });
 
     this.input.keyboard?.on("keydown-C", () => {
@@ -86,18 +87,7 @@ export default class GameScene extends Phaser.Scene {
       .map((entry) => entry.node);
   }
 
-  private updateTimeDisplay(timestep: number, dt: number): void {
-    this.timeDisplay.setText(
-      "time: " +
-        (timestep / 1000).toFixed(2) +
-        "s\n" +
-        "dt: " +
-        dt.toFixed(2) +
-        "ms"
-    );
-  }
-
   public update(timestep: number, dt: number): void {
-    this.updateTimeDisplay(timestep, dt);
+    this.debugDisplaySystem.update(timestep, dt, this.pointerCoords);
   }
 }
