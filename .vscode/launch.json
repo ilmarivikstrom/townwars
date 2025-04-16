@@ -1,22 +1,22 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "command": "npm run dev",
-            "name": "Debug: npm run dev",
-            "request": "launch",
-            "type": "node-terminal",
-        },
-        {
-            "name": "Debug in Chrome",
-            "type": "chrome",
-            "request": "attach",
-            "url": "http://localhost:5173",
-            "port": 9222,
-            "webRoot": "${workspaceFolder}",
-            "sourceMaps": true,
-            "trace": true,
-            "smartStep": true,
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "command": "npm run dev",
+      "name": "Debug: npm run dev",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "name": "Debug in Chrome",
+      "type": "chrome",
+      "request": "attach",
+      "url": "http://localhost:5173",
+      "port": 9222,
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true,
+      "trace": true,
+      "smartStep": true
+    }
+  ]
 }
