@@ -1,8 +1,10 @@
 import Phaser from "phaser";
 import DebugDisplaySystem from "../systems/DebugDisplaySystem.js";
+import Node from "../entities/Node.js";
 
 export default class GameScene extends Phaser.Scene {
-  private nodes: Phaser.Geom.Circle[] = [];
+  // private nodes: Phaser.Geom.Circle[] = [];
+  private nodes: Node[] = [];
   private graphics!: Phaser.GameObjects.Graphics;
   private pointerCoords: Phaser.Geom.Point = new Phaser.Geom.Point(-1, -1);
   private debugDisplaySystem!: DebugDisplaySystem;
@@ -21,7 +23,7 @@ export default class GameScene extends Phaser.Scene {
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.button === 0) {
         const nodeSize = Math.floor(Math.random() * (32 - 16 + 1)) + 16;
-        const newNode = new Phaser.Geom.Circle(pointer.x, pointer.y, nodeSize);
+        const newNode = new Node(this.graphics, pointer.x, pointer.y, nodeSize);
         this.nodes.push(newNode);
         console.log("Length of nodes: " + this.nodes.length.toString());
       }
@@ -49,12 +51,7 @@ export default class GameScene extends Phaser.Scene {
     this.graphics.clear();
 
     for (const node of this.nodes) {
-      if (node.contains(this.pointerCoords.x, this.pointerCoords.y)) {
-        this.graphics.lineStyle(8, 0xbbbbbb);
-      } else {
-        this.graphics.lineStyle(8, 0x666666);
-      }
-      this.graphics.strokeCircleShape(node);
+      node.draw();
     }
 
     // FIXME: Ensure no overlapping edges are ever created.
@@ -95,6 +92,9 @@ export default class GameScene extends Phaser.Scene {
 
   public update(timestep: number, dt: number): void {
     this.debugDisplaySystem.update(timestep, dt, this.pointerCoords);
+    for (const node of this.nodes) {
+      node.update(timestep, dt, this.pointerCoords);
+    }
     this.drawNodeGraph();
   }
 }

@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { GameConfig } from "./config.js";
+import { GameConfig } from "./GameConfig.js";
 import GameScene from "./scenes/GameScene.js";
 
 const townwars = new Phaser.Game({
