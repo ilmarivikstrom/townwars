@@ -1,13 +1,14 @@
 import Phaser from "phaser";
-import DebugDisplaySystem from "../systems/DebugDisplaySystem.js";
+import DebugUI from "../ui/DebugDisplay.js";
 import Node from "../entities/Node.js";
+import { Color } from "../utils/Color.js";
 
 export default class GameScene extends Phaser.Scene {
-  // private nodes: Phaser.Geom.Circle[] = [];
   private nodes: Node[] = [];
   private graphics!: Phaser.GameObjects.Graphics;
   private pointerCoords: Phaser.Geom.Point = new Phaser.Geom.Point(-1, -1);
-  private debugDisplaySystem!: DebugDisplaySystem;
+  private debugUI!: DebugUI;
+  private numEdges: integer = 0;
 
   public constructor() {
     super("GameScene");
@@ -18,14 +19,25 @@ export default class GameScene extends Phaser.Scene {
   public create(): void {
     this.graphics = this.add.graphics();
 
-    this.debugDisplaySystem = new DebugDisplaySystem(this);
+    this.debugUI = new DebugUI(this);
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.button === 0) {
         const nodeSize = Math.floor(Math.random() * (32 - 16 + 1)) + 16;
-        const newNode = new Node(this.graphics, pointer.x, pointer.y, nodeSize);
+
+        const newNode = new Node(
+          this,
+          this.graphics,
+          pointer.x,
+          pointer.y,
+          nodeSize
+        );
+        for (const node of this.nodes) {
+          if (Phaser.Geom.Intersects.CircleToCircle(node, newNode)) {
+            return;
+          }
+        }
         this.nodes.push(newNode);
-        console.log("Length of nodes: " + this.nodes.length.toString());
       }
     });
 
@@ -40,14 +52,14 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private deleteNodes(): void {
-    console.log(
-      "Clearing " + this.nodes.length.toString() + " nodes from the canvas."
-    );
+    for (const node of this.nodes) {
+      node.destroyTooltip();
+    }
     this.nodes = [];
-    this.drawNodeGraph();
   }
 
   private drawNodeGraph(): void {
+    this.numEdges = 0;
     this.graphics.clear();
 
     for (const node of this.nodes) {
@@ -57,13 +69,14 @@ export default class GameScene extends Phaser.Scene {
     // FIXME: Ensure no overlapping edges are ever created.
     for (const node of this.nodes) {
       if (node.contains(this.pointerCoords.x, this.pointerCoords.y)) {
-        this.graphics.lineStyle(4, 0xff0000, 1.0);
+        this.graphics.lineStyle(4, Color.RED.hexNumber, 1.0);
       } else {
-        this.graphics.lineStyle(4, 0xff9900, 0.4);
+        this.graphics.lineStyle(4, Color.GREEN.hexNumber, 0.4);
       }
       const closestNodes = this.getClosestNodes(node, 2);
       for (const targetNode of closestNodes) {
         this.graphics.lineBetween(node.x, node.y, targetNode.x, targetNode.y);
+        this.numEdges += 1;
       }
     }
   }
@@ -91,7 +104,13 @@ export default class GameScene extends Phaser.Scene {
   }
 
   public update(timestep: number, dt: number): void {
-    this.debugDisplaySystem.update(timestep, dt, this.pointerCoords);
+    this.debugUI.update(
+      timestep,
+      dt,
+      this.pointerCoords,
+      this.nodes.length,
+      this.numEdges
+    );
     for (const node of this.nodes) {
       node.update(timestep, dt, this.pointerCoords);
     }

@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { Color } from "./utils/Color.js";
 
 const gameCanvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
 
@@ -8,7 +9,7 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
   height: 720,
   roundPixels: true,
   canvas: gameCanvas,
-  backgroundColor: "#00001C",
+  backgroundColor: Color.GAME_WINDOW.hexString,
   disableContextMenu: true,
   physics: {
     default: "arcade",

@@ -1,8 +1,12 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  --dkClr: #181818;
-  --liClr: whitesmoke;
-  --accClr: #0d0d35;
+  --dkClr: #16161f;
+  --liClr: #c0caf5;
+}
+
+@font-face {
+  font-family: CaskaydiaMono;
+  src: url("./assets/fonts/CaskaydiaMonoNerdFont-Regular.ttf");
 }
 
 * {
@@ -38,7 +42,7 @@ main {
 }
 
 #gameCanvas {
-  border: 1px solid #444444;
+  border: 1px solid #414868;
   position: absolute;
   top: 50%;
   left: 50%;
