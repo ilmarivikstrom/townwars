@@ -15,7 +15,11 @@ export default class DebugUI {
       fontFamily: "CaskaydiaMono",
     });
     this.text.setDepth(1);
-    this.text.setAlpha(0.8);
+    this.text.setAlpha(1.0);
+  }
+
+  public toggleVisibility(): void {
+    this.text.setVisible(!this.text.visible);
   }
 
   public update(
@@ -42,7 +46,8 @@ export default class DebugUI {
         "\n" +
         "edges: " +
         numEdges.toString() +
-        (numNodes > 0 ? "\n\nPress 'C' to clear graph" : "")
+        "\n\nPress 'D' to toggle this UI" +
+        "\nPress 'C' to clear graph"
     );
   }
 

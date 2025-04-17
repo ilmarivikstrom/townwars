@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import DebugUI from "../ui/DebugDisplay.js";
+import DebugUI from "../ui/DebugUI.js";
 import Node from "../entities/Node.js";
 import { Color } from "../utils/Color.js";
 
@@ -48,6 +48,10 @@ export default class GameScene extends Phaser.Scene {
 
     this.input.keyboard?.on("keydown-C", () => {
       this.deleteNodes();
+    });
+
+    this.input.keyboard?.on("keydown-D", () => {
+      this.debugUI.toggleVisibility();
     });
   }
 
