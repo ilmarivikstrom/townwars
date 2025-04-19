@@ -6,15 +6,20 @@ export default class Node extends Phaser.Geom.Circle {
   private graphics!: Phaser.GameObjects.Graphics;
   private is_hovered: boolean = false;
   private tooltip!: Phaser.GameObjects.Text;
+  private production!: number;
+  private troops!: number;
+  private troopcount!: Phaser.GameObjects.Text;
 
   constructor(
     scene: Phaser.Scene,
     graphics: Phaser.GameObjects.Graphics,
     x: number,
     y: number,
-    radius: number
+    production: number
   ) {
-    super(x, y, radius);
+    super(x, y, 4 * production + 15);
+    this.production = production;
+    this.troops = 0;
     this.scene = scene;
     this.graphics = graphics;
     this.tooltip = this.scene.add.text(
@@ -27,7 +32,13 @@ export default class Node extends Phaser.Geom.Circle {
         this.y.toFixed(0) +
         "\n" +
         "r: " +
-        this.radius.toString(),
+        this.radius.toString() +
+        "\n\n" +
+        "Production: " +
+        this.production.toString() +
+        "\n" +
+        "Troops: " +
+        this.troops.toString(),
       {
         backgroundColor: Color.TOOLTIP_BACKGROUND.hexString,
         color: Color.TEXT_DEFAULT.hexString,
@@ -38,6 +49,11 @@ export default class Node extends Phaser.Geom.Circle {
     this.tooltip.setDepth(1);
     this.tooltip.setAlpha(0.8);
     this.tooltip.setVisible(false);
+    this.troopcount = this.scene.add.text(
+      this.x-4,
+      this.y+4,
+      this.troops.toString()
+    );
   }
 
   public update(
@@ -52,6 +68,10 @@ export default class Node extends Phaser.Geom.Circle {
     }
     this.tooltip.x = pointerCoords.x;
     this.tooltip.y = pointerCoords.y - (2 * 12 + 3 * 6 + 3 * 12); // Offset by 2 * padding + 3 * row spacing + 3 * font height
+
+    this.troops = this.troops + this.production;
+    this.troopcount.setText(this.troops.toString()
+    );
   }
 
   public draw(): void {

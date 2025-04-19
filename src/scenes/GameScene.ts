@@ -23,14 +23,15 @@ export default class GameScene extends Phaser.Scene {
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.button === 0) {
-        const nodeSize = Math.floor(Math.random() * (32 - 16 + 1)) + 16;
+        //onst nodeSize = Math.floor(Math.random() * (32 - 16 + 1)) + 16;
+        const nodeProduction = Math.floor(Math.random() * 5) + 1;
 
         const newNode = new Node(
           this,
           this.graphics,
           pointer.x,
           pointer.y,
-          nodeSize
+          nodeProduction
         );
         for (const node of this.nodes) {
           if (Phaser.Geom.Intersects.CircleToCircle(node, newNode)) {
