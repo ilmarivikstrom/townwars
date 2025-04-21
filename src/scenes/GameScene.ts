@@ -23,21 +23,27 @@ export default class GameScene extends Phaser.Scene {
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.button === 0) {
-        //onst nodeSize = Math.floor(Math.random() * (32 - 16 + 1)) + 16;
-        const nodeProduction = Math.floor(Math.random() * 5) + 1;
+        const productionRate = Math.floor(Math.random() * 5) + 1;
+
+        const testCircle = new Phaser.Geom.Circle(
+          pointer.x,
+          pointer.y,
+          4 * productionRate + 15
+        );
+
+        for (const node of this.nodes) {
+          if (Phaser.Geom.Intersects.CircleToCircle(node, testCircle)) {
+            return;
+          }
+        }
 
         const newNode = new Node(
           this,
           this.graphics,
           pointer.x,
           pointer.y,
-          nodeProduction
+          productionRate
         );
-        for (const node of this.nodes) {
-          if (Phaser.Geom.Intersects.CircleToCircle(node, newNode)) {
-            return;
-          }
-        }
         this.nodes.push(newNode);
       }
     });
@@ -67,10 +73,6 @@ export default class GameScene extends Phaser.Scene {
     this.numEdges = 0;
     this.graphics.clear();
 
-    for (const node of this.nodes) {
-      node.draw();
-    }
-
     // FIXME: Ensure no overlapping edges are ever created.
     for (const node of this.nodes) {
       if (node.contains(this.pointerCoords.x, this.pointerCoords.y)) {
@@ -83,6 +85,10 @@ export default class GameScene extends Phaser.Scene {
         this.graphics.lineBetween(node.x, node.y, targetNode.x, targetNode.y);
         this.numEdges += 1;
       }
+    }
+
+    for (const node of this.nodes) {
+      node.draw();
     }
   }
 
