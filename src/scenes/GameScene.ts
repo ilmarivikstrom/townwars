@@ -1,3 +1,4 @@
+import { v4 as uuid } from "uuid";
 import Phaser from "phaser";
 import DebugUI from "../ui/DebugUI.js";
 import Node from "../entities/Node.js";
@@ -11,6 +12,7 @@ export default class GameScene extends Phaser.Scene {
   private debugUI!: DebugUI;
   private statisticsUI!: StatisticsUI;
   private numEdges: integer = 0;
+  private clientId: string = uuid();
 
   public constructor() {
     super("GameScene");
@@ -47,6 +49,9 @@ export default class GameScene extends Phaser.Scene {
           pointer.y,
           productionRate
         );
+        if (this.nodes.length === 0) {
+          newNode.setOwner(this.clientId);
+        }
         this.nodes.push(newNode);
       }
     });

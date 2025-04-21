@@ -7,9 +7,12 @@ export default class Node extends Phaser.Geom.Circle {
   private graphics!: Phaser.GameObjects.Graphics;
   private is_hovered: boolean = false;
   private tooltip!: Phaser.GameObjects.Text;
+  private owner: string = "";
   private productionRate!: number;
   private troops!: number;
   private troopCount!: Phaser.GameObjects.Text;
+
+  private fillColor: number = Color.GAME_WINDOW.hexNumber;
 
   constructor(
     scene: Phaser.Scene,
@@ -45,6 +48,11 @@ export default class Node extends Phaser.Geom.Circle {
     this.troopCount.setOrigin(0.5, 0.5);
   }
 
+  public setOwner(newOwner: string): void {
+    this.owner = newOwner;
+    this.fillColor = Color.DEFAULT_PLAYER_COLOR.hexNumber;
+  }
+
   private getUpdatedTooltipText(): string {
     const tooltipText =
       "x: " +
@@ -61,7 +69,9 @@ export default class Node extends Phaser.Geom.Circle {
       "/s" +
       "\n" +
       "Troops: " +
-      this.troops.toFixed(0);
+      this.troops.toFixed(0) +
+      "\nOwner: " +
+      (this.owner === "" ? "None" : this.owner);
     return tooltipText;
   }
 
@@ -107,7 +117,7 @@ export default class Node extends Phaser.Geom.Circle {
       this.graphics.lineStyle(4, Color.GRAY.hexNumber, 0.5);
       this.tooltip.setVisible(false);
     }
-    this.graphics.fillStyle(Color.GAME_WINDOW.hexNumber);
+    this.graphics.fillStyle(this.fillColor);
     this.graphics.fillCircleShape(this);
     this.graphics.strokeCircleShape(this);
   }

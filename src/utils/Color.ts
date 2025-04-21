@@ -4,6 +4,10 @@ type ColorEntry = {
 };
 
 export const Color: Record<string, ColorEntry> = {
+  DEFAULT_PLAYER_COLOR: {
+    hexString: "#3d59a1",
+    hexNumber: 0x3d59a1,
+  },
   OUTSIDE: {
     hexString: "#1f2335",
     hexNumber: 0x1f2335,
