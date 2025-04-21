@@ -67,7 +67,7 @@ export default class GameScene extends Phaser.Scene {
 
   private deleteNodes(): void {
     for (const node of this.nodes) {
-      node.destroyTooltip();
+      node.destroyChildren();
     }
     this.nodes = [];
   }

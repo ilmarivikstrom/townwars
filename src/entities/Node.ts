@@ -112,7 +112,12 @@ export default class Node extends Phaser.Geom.Circle {
     this.graphics.strokeCircleShape(this);
   }
 
-  public destroyTooltip(): void {
+  // public destroyTooltip(): void {
+  //   this.tooltip.destroy();
+  // }
+
+  public destroyChildren(): void {
     this.tooltip.destroy();
+    this.troopCount.destroy();
   }
 }
