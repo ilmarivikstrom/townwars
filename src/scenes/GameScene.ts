@@ -84,9 +84,9 @@ export default class GameScene extends Phaser.Scene {
     // FIXME: Ensure no overlapping edges are ever created.
     for (const node of this.nodes) {
       if (node.contains(this.pointerCoords.x, this.pointerCoords.y)) {
-        this.graphics.lineStyle(4, Color.RED.hexNumber, 1.0);
+        this.graphics.lineStyle(4, Color.RED, 1.0);
       } else {
-        this.graphics.lineStyle(4, Color.GREEN.hexNumber, 0.4);
+        this.graphics.lineStyle(4, Color.GREEN, 0.4);
       }
       const closestNodes = this.getClosestNodes(node, 2);
       for (const targetNode of closestNodes) {

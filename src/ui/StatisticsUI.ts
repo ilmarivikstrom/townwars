@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { Color } from "../utils/Color.js";
+import { Color, toHexColor } from "../utils/Color.js";
 import { Config } from "../utils/Config.js";
 import { formatCompactNumber } from "../utils/Math.js";
 import Node from "../entities/Node.js";
@@ -16,8 +16,8 @@ export default class StatisticsUI {
       Config.PADDING_ELEMENTS,
       "",
       {
-        backgroundColor: Color.TOOLTIP_BACKGROUND.hexString,
-        color: Color.TEXT_DEFAULT.hexString,
+        backgroundColor: toHexColor(Color.TOOLTIP_BACKGROUND),
+        color: toHexColor(Color.TEXT_DEFAULT),
         padding: { x: Config.PADDING_TEXT, y: Config.PADDING_TEXT },
         fontFamily: "CaskaydiaMono",
       }

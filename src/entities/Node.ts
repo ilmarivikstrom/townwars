@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { Color } from "../utils/Color.js";
+import { Color, toHexColor } from "../utils/Color.js";
 import { Config } from "../utils/Config.js";
 
 export default class Node extends Phaser.Geom.Circle {
@@ -12,7 +12,7 @@ export default class Node extends Phaser.Geom.Circle {
   private troops!: number;
   private troopCount!: Phaser.GameObjects.Text;
 
-  private fillColor: number = Color.GAME_WINDOW.hexNumber;
+  private fillColor: number = Color.GAME_WINDOW;
 
   constructor(
     scene: Phaser.Scene,
@@ -31,8 +31,8 @@ export default class Node extends Phaser.Geom.Circle {
       this.y,
       this.getUpdatedTooltipText(),
       {
-        backgroundColor: Color.TOOLTIP_BACKGROUND.hexString,
-        color: Color.TEXT_DEFAULT.hexString,
+        backgroundColor: toHexColor(Color.TOOLTIP_BACKGROUND),
+        color: toHexColor(Color.TEXT_DEFAULT),
         padding: { x: Config.PADDING_TEXT, y: Config.PADDING_TEXT },
         fontFamily: "CaskaydiaMono",
       }
@@ -50,7 +50,7 @@ export default class Node extends Phaser.Geom.Circle {
 
   public setOwner(newOwner: string): void {
     this.owner = newOwner;
-    this.fillColor = Color.DEFAULT_PLAYER_COLOR.hexNumber;
+    this.fillColor = Color.DEFAULT_PLAYER_COLOR;
   }
 
   private getUpdatedTooltipText(): string {
@@ -111,10 +111,10 @@ export default class Node extends Phaser.Geom.Circle {
 
   public draw(): void {
     if (this.is_hovered) {
-      this.graphics.lineStyle(4, Color.ORANGE.hexNumber, 1.0);
+      this.graphics.lineStyle(4, Color.ORANGE, 1.0);
       this.tooltip.setVisible(true);
     } else {
-      this.graphics.lineStyle(4, Color.GRAY.hexNumber, 0.5);
+      this.graphics.lineStyle(4, Color.GRAY, 0.5);
       this.tooltip.setVisible(false);
     }
     this.graphics.fillStyle(this.fillColor);

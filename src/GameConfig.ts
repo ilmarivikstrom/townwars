@@ -10,7 +10,7 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
   height: Config.WINDOW_HEIGHT,
   roundPixels: true,
   canvas: gameCanvas,
-  backgroundColor: Color.GAME_WINDOW.hexString,
+  backgroundColor: Color.GAME_WINDOW,
   disableContextMenu: true,
   physics: {
     default: "arcade",

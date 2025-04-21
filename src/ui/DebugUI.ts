@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { Color } from "../utils/Color.js";
+import { Color, toHexColor } from "../utils/Color.js";
 
 export default class DebugUI {
   private scene: Phaser.Scene;
@@ -9,8 +9,8 @@ export default class DebugUI {
     this.scene = scene;
 
     this.text = this.scene.add.text(24, 24, "", {
-      backgroundColor: Color.TOOLTIP_BACKGROUND.hexString,
-      color: Color.TEXT_DEFAULT.hexString,
+      backgroundColor: toHexColor(Color.TOOLTIP_BACKGROUND),
+      color: toHexColor(Color.TEXT_DEFAULT),
       padding: { x: 12, y: 12 },
       fontFamily: "CaskaydiaMono",
     });
