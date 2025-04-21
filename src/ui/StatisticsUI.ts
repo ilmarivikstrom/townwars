@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { Color } from "../utils/Color.js";
 import { Config } from "../utils/Config.js";
+import { formatCompactNumber } from "../utils/Math.js";
 import Node from "../entities/Node.js";
 
 export default class StatisticsUI {
@@ -38,9 +39,10 @@ export default class StatisticsUI {
       totalTroops += node.getTroops();
       productionRate += node.getProductionRate();
     }
+    const totalTroopsCompact = formatCompactNumber(totalTroops);
     this.text.setText(
       "Total troops: " +
-        totalTroops.toFixed(0) +
+        totalTroopsCompact +
         "\nTotal rate: " +
         productionRate.toString() +
         "/s"
