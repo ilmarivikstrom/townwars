@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { Color } from "../utils/Color.js";
+import { Config } from "../utils/Config.js";
 
 export default class Node extends Phaser.Geom.Circle {
   private scene!: Phaser.Scene;
@@ -29,7 +30,7 @@ export default class Node extends Phaser.Geom.Circle {
       {
         backgroundColor: Color.TOOLTIP_BACKGROUND.hexString,
         color: Color.TEXT_DEFAULT.hexString,
-        padding: { x: 12, y: 12 },
+        padding: { x: Config.PADDING_TEXT, y: Config.PADDING_TEXT },
         fontFamily: "CaskaydiaMono",
       }
     );
@@ -38,9 +39,10 @@ export default class Node extends Phaser.Geom.Circle {
     this.tooltip.setVisible(false);
     this.troopCount = this.scene.add.text(
       this.x,
-      this.y - 6,
+      this.y,
       this.troops.toString()
     );
+    this.troopCount.setOrigin(0.5, 0.5);
   }
 
   private getUpdatedTooltipText(): string {
@@ -79,11 +81,12 @@ export default class Node extends Phaser.Geom.Circle {
 
     this.tooltip.x = pointerCoords.x;
     this.tooltip.y =
-      pointerCoords.y - (2 * 12 + tooltipRows * 6 + tooltipRows * 14); // Offset by 2 * padding + 3 * row spacing + 3 * font height
+      pointerCoords.y -
+      (2 * Config.PADDING_TEXT +
+        tooltipRows * Config.SPACING_TEXT +
+        tooltipRows * 14); // Offset by 2 * padding + 3 * row spacing + 3 * font height
 
     this.troops = this.troops + this.productionRate * (dt / 1000);
-    const troopTextOffset = this.troops.toFixed(0).length * 4; // Offset to accommodate for extra character, e.g., 9 -> 10
-    this.troopCount.setX(this.x - troopTextOffset);
     this.troopCount.setText(this.troops.toFixed(0));
     this.tooltip.setText(newTooltipText);
   }
