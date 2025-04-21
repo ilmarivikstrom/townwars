@@ -27,7 +27,8 @@ export default class DebugUI {
     dt: number,
     pointerCoords: Phaser.Geom.Point,
     numNodes: integer,
-    numEdges: integer
+    numEdges: integer,
+    userId: string
   ): void {
     this.text.setText(
       "time: " +
@@ -46,8 +47,11 @@ export default class DebugUI {
         "\n" +
         "edges: " +
         numEdges.toString() +
+        "\nPlayer ID: " +
+        userId +
         "\n\nPress 'D' to toggle this UI" +
-        "\nPress 'C' to clear graph"
+        "\nPress 'C' to clear graph" +
+        "\nPress RMB to delete a node"
     );
   }
 

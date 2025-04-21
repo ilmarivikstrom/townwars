@@ -12,7 +12,7 @@ export default class GameScene extends Phaser.Scene {
   private debugUI!: DebugUI;
   private statisticsUI!: StatisticsUI;
   private numEdges: integer = 0;
-  private clientId: string = uuid();
+  private currentUserId: string = uuid();
 
   public constructor() {
     super("GameScene");
@@ -50,9 +50,17 @@ export default class GameScene extends Phaser.Scene {
           productionRate
         );
         if (this.nodes.length === 0) {
-          newNode.setOwner(this.clientId);
+          newNode.setOwner(this.currentUserId);
         }
         this.nodes.push(newNode);
+      } else if (pointer.button === 2) {
+        for (const [index, node] of this.nodes.entries()) {
+          if (node.contains(pointer.x, pointer.y)) {
+            node.destroyChildren();
+            this.nodes.splice(index, 1);
+            return;
+          }
+        }
       }
     });
 
@@ -128,7 +136,8 @@ export default class GameScene extends Phaser.Scene {
       dt,
       this.pointerCoords,
       this.nodes.length,
-      this.numEdges
+      this.numEdges,
+      this.currentUserId
     );
     this.statisticsUI.update(timestep, dt, this.nodes);
     for (const node of this.nodes) {
