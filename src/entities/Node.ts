@@ -88,6 +88,14 @@ export default class Node extends Phaser.Geom.Circle {
     this.tooltip.setText(newTooltipText);
   }
 
+  public getTroops(): number {
+    return this.troops;
+  }
+
+  public getProductionRate(): number {
+    return this.productionRate;
+  }
+
   public draw(): void {
     if (this.is_hovered) {
       this.graphics.lineStyle(4, Color.ORANGE.hexNumber, 1.0);

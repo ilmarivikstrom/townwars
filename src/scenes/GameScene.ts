@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import DebugUI from "../ui/DebugUI.js";
 import Node from "../entities/Node.js";
+import StatisticsUI from "../ui/StatisticsUI.js";
 import { Color } from "../utils/Color.js";
 
 export default class GameScene extends Phaser.Scene {
@@ -8,6 +9,7 @@ export default class GameScene extends Phaser.Scene {
   private graphics!: Phaser.GameObjects.Graphics;
   private pointerCoords: Phaser.Geom.Point = new Phaser.Geom.Point(-1, -1);
   private debugUI!: DebugUI;
+  private statisticsUI!: StatisticsUI;
   private numEdges: integer = 0;
 
   public constructor() {
@@ -20,6 +22,7 @@ export default class GameScene extends Phaser.Scene {
     this.graphics = this.add.graphics();
 
     this.debugUI = new DebugUI(this);
+    this.statisticsUI = new StatisticsUI(this);
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.button === 0) {
@@ -122,6 +125,7 @@ export default class GameScene extends Phaser.Scene {
       this.nodes.length,
       this.numEdges
     );
+    this.statisticsUI.update(timestep, dt, this.nodes);
     for (const node of this.nodes) {
       node.update(timestep, dt, this.pointerCoords);
     }

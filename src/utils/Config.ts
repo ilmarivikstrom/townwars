@@ -1,0 +1,6 @@
+export const Config = {
+  PADDING_ELEMENTS: 24,
+  PADDING_TEXT: 12,
+  WINDOW_WIDTH: 1280,
+  WINDOW_HEIGHT: 720,
+};
