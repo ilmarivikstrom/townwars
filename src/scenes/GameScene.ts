@@ -13,6 +13,7 @@ export default class GameScene extends Phaser.Scene {
   private statisticsUI!: StatisticsUI;
   private numEdges: integer = 0;
   private currentUserId: string = uuid();
+  private controlButton: boolean = false;
 
   public constructor() {
     super("GameScene");
@@ -42,16 +43,17 @@ export default class GameScene extends Phaser.Scene {
           }
         }
 
+        const nodeOwner = this.controlButton ? this.currentUserId : "";
+
+
         const newNode = new Node(
           this,
           this.graphics,
           pointer.x,
           pointer.y,
-          productionRate
+          productionRate,
+          nodeOwner,
         );
-        if (this.nodes.length === 0) {
-          newNode.setOwner(this.currentUserId);
-        }
         this.nodes.push(newNode);
       } else if (pointer.button === 2) {
         for (const [index, node] of this.nodes.entries()) {
@@ -75,6 +77,14 @@ export default class GameScene extends Phaser.Scene {
 
     this.input.keyboard?.on("keydown-D", () => {
       this.debugUI.toggleVisibility();
+    });
+
+    this.input.keyboard?.on("keydown-CTRL", () => {
+      this.controlButton = true;
+    });
+
+    this.input.keyboard?.on("keyup-CTRL", () => {
+      this.controlButton = false;
     });
   }
 
@@ -144,5 +154,6 @@ export default class GameScene extends Phaser.Scene {
       node.update(timestep, dt, this.pointerCoords);
     }
     this.drawNodeGraph();
+    console.log("Control: " + this.controlButton.toString());
   }
 }
