@@ -75,6 +75,10 @@ export default class Node extends Phaser.Geom.Circle {
     this.selected = selected;
   }
 
+  public getSelected(): boolean {
+    return this.selected;
+  }
+
   public setOwner(newOwner: string): void {
     this.owner = newOwner;
     if (this.owner !== "") {

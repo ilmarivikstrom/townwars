@@ -14,6 +14,7 @@ export default class GameScene extends Phaser.Scene {
   private numEdges: integer = 0;
   private currentUserId: string = uuid();
   private controlButton: boolean = false;
+  private shiftButton: boolean = false;
 
   public constructor() {
     super("GameScene");
@@ -21,7 +22,7 @@ export default class GameScene extends Phaser.Scene {
 
   public preload(): void {}
 
-  private tryCreateNewNode(x: number, y: number): void {
+  private tryCreateNewNode(x: number, y: number, owner: string): void {
     const productionRate = Math.floor(Math.random() * 5) + 1;
     const testCircle = new Phaser.Geom.Circle(
       x,
@@ -34,14 +35,13 @@ export default class GameScene extends Phaser.Scene {
         return;
       }
     }
-    const nodeOwner = this.controlButton ? this.currentUserId : "";
     const newNode = new Node(
       this,
       this.graphics,
       x,
       y,
       productionRate,
-      nodeOwner,
+      owner,
     );
     this.nodes.push(newNode);
   }
@@ -56,12 +56,16 @@ export default class GameScene extends Phaser.Scene {
       if (pointer.button === 0) {
         for (const node of this.nodes) {
           if (node.contains(pointer.x, pointer.y)) {
-            node.setSelected(true);
+            node.setSelected(!node.getSelected());
           } else {
             node.setSelected(false);
           }
         }
-        this.tryCreateNewNode(pointer.x, pointer.y);
+        if (this.controlButton) {
+          this.tryCreateNewNode(pointer.x, pointer.y, "");
+        } else if (this.shiftButton) {
+          this.tryCreateNewNode(pointer.x, pointer.y, this.currentUserId);
+        }
       } else if (pointer.button === 2) {
         for (const [index, node] of this.nodes.entries()) {
           if (node.contains(pointer.x, pointer.y)) {
@@ -92,6 +96,14 @@ export default class GameScene extends Phaser.Scene {
 
     this.input.keyboard?.on("keyup-CTRL", () => {
       this.controlButton = false;
+    });
+
+    this.input.keyboard?.on("keydown-SHIFT", () => {
+      this.shiftButton = true;
+    });
+
+    this.input.keyboard?.on("keyup-SHIFT", () => {
+      this.shiftButton = false;
     });
   }
 
