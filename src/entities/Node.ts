@@ -146,5 +146,6 @@ export default class Node extends Phaser.Geom.Circle {
   public destroyChildren(): void {
     this.tooltip.destroy();
     this.troopCountText.destroy();
+    this.pointLight.destroy();
   }
 }
