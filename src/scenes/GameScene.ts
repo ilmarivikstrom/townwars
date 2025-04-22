@@ -161,6 +161,5 @@ export default class GameScene extends Phaser.Scene {
       node.update(timestep, dt, this.pointerCoords);
     }
     this.drawNodeGraph();
-    console.log("Control: " + this.controlButton.toString());
   }
 }
