@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { Color, toHexColor } from "../utils/Color.js";
+import { Layers } from "../utils/Config.js";
 
 export default class DebugUI {
   private scene: Phaser.Scene;
@@ -14,7 +15,7 @@ export default class DebugUI {
       padding: { x: 12, y: 12 },
       fontFamily: "CaskaydiaMono",
     });
-    this.text.setDepth(1);
+    this.text.setDepth(Layers.UI);
     this.text.setAlpha(1.0);
   }
 

@@ -5,3 +5,13 @@ export const Config = {
   WINDOW_WIDTH: 1280,
   WINDOW_HEIGHT: 720,
 };
+
+export enum Layers {
+  BACKGROUND,
+  EDGE,
+  NODE_LIGHT,
+  NODE_BASE,
+  NODE_CONTENT,
+  NODE_TOOLTIP,
+  UI,
+}

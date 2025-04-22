@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { Color, toHexColor } from "../utils/Color.js";
-import { Config } from "../utils/Config.js";
+import { Config, Layers } from "../utils/Config.js";
 import { formatCompactNumber } from "../utils/Math.js";
 import Node from "../entities/Node.js";
 
@@ -24,7 +24,7 @@ export default class StatisticsUI {
     );
     this.text.setOrigin(1, 0);
     this.text.setAlign("right");
-    this.text.setDepth(1);
+    this.text.setDepth(Layers.UI);
     this.text.setAlpha(1.0);
   }
 

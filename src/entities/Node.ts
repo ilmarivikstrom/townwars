@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { Color, toHexColor } from "../utils/Color.js";
-import { Config } from "../utils/Config.js";
+import { Config, Layers } from "../utils/Config.js";
 
 export default class Node extends Phaser.Geom.Circle {
   private scene!: Phaser.Scene;
@@ -10,7 +10,8 @@ export default class Node extends Phaser.Geom.Circle {
   private owner: string = "";
   private productionRate!: number;
   private troops!: number;
-  private troopCount!: Phaser.GameObjects.Text;
+  private troopCountText!: Phaser.GameObjects.Text;
+  private pointLight!: Phaser.GameObjects.PointLight;
 
   private fillColor: number = Color.GAME_WINDOW;
 
@@ -26,6 +27,8 @@ export default class Node extends Phaser.Geom.Circle {
     this.troops = 0;
     this.scene = scene;
     this.graphics = graphics;
+
+    this.graphics.setDepth(Layers.NODE_BASE);
     this.tooltip = this.scene.add.text(
       this.x,
       this.y,
@@ -37,15 +40,28 @@ export default class Node extends Phaser.Geom.Circle {
         fontFamily: "CaskaydiaMono",
       }
     );
-    this.tooltip.setDepth(1);
+    this.tooltip.setDepth(Layers.NODE_TOOLTIP);
     this.tooltip.setAlpha(0.8);
     this.tooltip.setVisible(false);
-    this.troopCount = this.scene.add.text(
+
+    this.troopCountText = this.scene.add.text(
       this.x,
       this.y,
       this.troops.toString()
     );
-    this.troopCount.setOrigin(0.5, 0.5);
+    this.troopCountText.setOrigin(0.5, 0.5);
+    this.troopCountText.setDepth(Layers.NODE_CONTENT);
+
+    this.pointLight = this.scene.add.pointlight(
+      this.x,
+      this.y,
+      this.fillColor,
+      this.radius * 3,
+      1.5,
+      0.05
+    );
+    this.pointLight.setDepth(Layers.NODE_LIGHT);
+    this.pointLight.setVisible(false);
   }
 
   public setOwner(newOwner: string): void {
@@ -97,7 +113,7 @@ export default class Node extends Phaser.Geom.Circle {
         tooltipRows * 14); // Offset by 2 * padding + 3 * row spacing + 3 * font height
 
     this.troops = this.troops + this.productionRate * (dt / 1000);
-    this.troopCount.setText(this.troops.toFixed(0));
+    this.troopCountText.setText(this.troops.toFixed(0));
     this.tooltip.setText(newTooltipText);
   }
 
@@ -113,9 +129,14 @@ export default class Node extends Phaser.Geom.Circle {
     if (this.is_hovered) {
       this.graphics.lineStyle(4, Color.ORANGE, 1.0);
       this.tooltip.setVisible(true);
+      this.pointLight.setVisible(true);
     } else {
       this.graphics.lineStyle(4, Color.GRAY, 0.5);
       this.tooltip.setVisible(false);
+      this.pointLight.setVisible(false);
+    }
+    if (this.owner !== "") {
+      this.pointLight.setVisible(true);
     }
     this.graphics.fillStyle(this.fillColor);
     this.graphics.fillCircleShape(this);
@@ -124,6 +145,6 @@ export default class Node extends Phaser.Geom.Circle {
 
   public destroyChildren(): void {
     this.tooltip.destroy();
-    this.troopCount.destroy();
+    this.troopCountText.destroy();
   }
 }

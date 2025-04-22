@@ -21,8 +21,12 @@
 - [ ] Create a Phaser.GameObjects.Container class that contains other UI classes (sidebar, indicators, keymaps, score, etc.) https://docs.phaser.io/api-documentation/class/gameobjects-container
   - Bonus points: consider implementing in a way that we can resize the game canvas in the future
 - [ ] Main Menu / Lobby scene
-- [ ] Settings scene
+- [ ] Settings scene (store in e.g., localstorage for the time being)
+  - Username
+  - User color selection
 - [x] Basic tooltip when hovering over a `Node`.
+- [ ] Actions menu when clicking on a Node.
+- [ ] Events & notifications (like 'toaster')
 
 ## Other
 
@@ -37,3 +41,4 @@
   - Idea 1: `Graph` class has a member `nodes: Node[]` member and `edges: Edge[]` member. `Edge` would have members `source: Node` and `target: Node`.
   - Idea 2: `Graph` class has a member `nodes: Node[]`, and `Node` class has a member `edges: Edge[]`.
   - Consider tradeoffs of different approaches to the `Node` <-> `Edge` relationship.
+- [ ] Indicators to mark Nodes under attack
