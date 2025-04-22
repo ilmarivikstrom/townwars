@@ -21,6 +21,31 @@ export default class GameScene extends Phaser.Scene {
 
   public preload(): void {}
 
+  private tryCreateNewNode(x: number, y: number): void {
+    const productionRate = Math.floor(Math.random() * 5) + 1;
+    const testCircle = new Phaser.Geom.Circle(
+      x,
+      y,
+      4 * productionRate + 15
+    );
+
+    for (const node of this.nodes) {
+      if (Phaser.Geom.Intersects.CircleToCircle(node, testCircle)) {
+        return;
+      }
+    }
+    const nodeOwner = this.controlButton ? this.currentUserId : "";
+    const newNode = new Node(
+      this,
+      this.graphics,
+      x,
+      y,
+      productionRate,
+      nodeOwner,
+    );
+    this.nodes.push(newNode);
+  }
+
   public create(): void {
     this.graphics = this.add.graphics();
 
@@ -29,32 +54,14 @@ export default class GameScene extends Phaser.Scene {
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.button === 0) {
-        const productionRate = Math.floor(Math.random() * 5) + 1;
-
-        const testCircle = new Phaser.Geom.Circle(
-          pointer.x,
-          pointer.y,
-          4 * productionRate + 15
-        );
-
         for (const node of this.nodes) {
-          if (Phaser.Geom.Intersects.CircleToCircle(node, testCircle)) {
-            return;
+          if (node.contains(pointer.x, pointer.y)) {
+            node.setSelected(true);
+          } else {
+            node.setSelected(false);
           }
         }
-
-        const nodeOwner = this.controlButton ? this.currentUserId : "";
-
-
-        const newNode = new Node(
-          this,
-          this.graphics,
-          pointer.x,
-          pointer.y,
-          productionRate,
-          nodeOwner,
-        );
-        this.nodes.push(newNode);
+        this.tryCreateNewNode(pointer.x, pointer.y);
       } else if (pointer.button === 2) {
         for (const [index, node] of this.nodes.entries()) {
           if (node.contains(pointer.x, pointer.y)) {

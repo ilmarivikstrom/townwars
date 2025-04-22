@@ -5,13 +5,14 @@ import { Config, Layers } from "../utils/Config.js";
 export default class Node extends Phaser.Geom.Circle {
   private scene!: Phaser.Scene;
   private graphics!: Phaser.GameObjects.Graphics;
-  private is_hovered: boolean = false;
   private tooltip!: Phaser.GameObjects.Text;
-  private owner: string = "";
   private productionRate!: number;
   private troops!: number;
   private troopCountText!: Phaser.GameObjects.Text;
   private pointLight!: Phaser.GameObjects.PointLight;
+  private selected: boolean = false;
+  private isHovered: boolean = false;
+  private owner: string = "";
 
   private fillColor: number = Color.GAME_WINDOW;
 
@@ -62,12 +63,16 @@ export default class Node extends Phaser.Geom.Circle {
     this.pointLight = this.scene.add.pointlight(
       this.x,
       this.y,
-      this.fillColor,
-      this.radius * 2,
-      2,
+      Color.ORANGE,
+      this.radius * 3,
+      0.2,
       0.05
     );
     this.pointLight.setDepth(Layers.NODE_LIGHT);
+  }
+
+  public setSelected(selected: boolean): void {
+    this.selected = selected;
   }
 
   public setOwner(newOwner: string): void {
@@ -105,9 +110,9 @@ export default class Node extends Phaser.Geom.Circle {
     pointerCoords: Phaser.Geom.Point
   ): void {
     if (this.contains(pointerCoords.x, pointerCoords.y)) {
-      this.is_hovered = true;
+      this.isHovered = true;
     } else {
-      this.is_hovered = false;
+      this.isHovered = false;
     }
 
     const newTooltipText = this.getUpdatedTooltipText();
@@ -136,19 +141,17 @@ export default class Node extends Phaser.Geom.Circle {
   }
 
   public draw(): void {
-    if (this.owner !== "") {
+    if (this.selected) {
       this.pointLight.setVisible(true);
-    } else {
-      this.pointLight.setVisible(false);
-    }
-    if (this.is_hovered) {
       this.graphics.lineStyle(4, Color.ORANGE, 1.0);
-      this.tooltip.setVisible(true);
-      this.pointLight.setVisible(true);
     } else {
-      this.graphics.lineStyle(4, Color.GRAY, 0.5);
-      this.tooltip.setVisible(false);
       this.pointLight.setVisible(false);
+      this.graphics.lineStyle(4, Color.GRAY, 0.5);
+    }
+    if (this.isHovered) {
+      this.tooltip.setVisible(true);
+    } else {
+      this.tooltip.setVisible(false);
     }
     this.graphics.fillStyle(this.fillColor);
     this.graphics.fillCircleShape(this);
