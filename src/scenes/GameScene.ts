@@ -40,7 +40,7 @@ export default class GameScene extends Phaser.Scene {
         }
       } else if (pointer.button === 2) {
         for (const [index, node] of this.nodes.entries()) {
-          if (node.contains(pointer.x, pointer.y)) {
+          if (node.geomCircle.contains(pointer.x, pointer.y)) {
             node.destroyChildren();
             this.nodes.splice(index, 1);
             return;
@@ -53,10 +53,6 @@ export default class GameScene extends Phaser.Scene {
       if (pointer.button === 0) {
         this.leftMouseDown = false;
       }
-    });
-
-    this.input.on("dragstart", (pointer: Phaser.Input.Pointer) => {
-      console.log("Drag start!");
     });
 
     this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
@@ -91,7 +87,7 @@ export default class GameScene extends Phaser.Scene {
 
   private updateNodeSelection(x: number, y: number): void {
     for (const node of this.nodes) {
-      if (node.contains(x, y)) {
+      if (node.geomCircle.contains(x, y)) {
         node.setSelected(true);
       } else {
         node.setSelected(false);
@@ -104,11 +100,12 @@ export default class GameScene extends Phaser.Scene {
     const testCircle = new Phaser.Geom.Circle(x, y, 4 * productionRate + 15);
 
     for (const node of this.nodes) {
-      if (Phaser.Geom.Intersects.CircleToCircle(node, testCircle)) {
+      if (Phaser.Geom.Intersects.CircleToCircle(node.geomCircle, testCircle)) {
         return;
       }
     }
-    const newNode = new Node(this, this.graphics, x, y, productionRate, owner);
+
+    const newNode = new Node(this, x, y, productionRate, owner);
     this.nodes.push(newNode);
   }
 
@@ -125,14 +122,21 @@ export default class GameScene extends Phaser.Scene {
 
     // FIXME: Ensure no overlapping edges are ever created.
     for (const node of this.nodes) {
-      if (node.contains(this.pointerCoords.x, this.pointerCoords.y)) {
+      if (
+        node.geomCircle.contains(this.pointerCoords.x, this.pointerCoords.y)
+      ) {
         this.graphics.lineStyle(4, Color.RED, 1.0);
       } else {
         this.graphics.lineStyle(4, Color.GREEN, 0.4);
       }
       const closestNodes = this.getClosestNodes(node, 2);
       for (const targetNode of closestNodes) {
-        this.graphics.lineBetween(node.x, node.y, targetNode.x, targetNode.y);
+        this.graphics.lineBetween(
+          node.geomCircle.x,
+          node.geomCircle.y,
+          targetNode.x,
+          targetNode.y
+        );
         this.numEdges += 1;
       }
     }
@@ -143,25 +147,26 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private getClosestNodes(
-    sourceNode: Phaser.Geom.Circle,
+    sourceNode: Node,
     maxConnections: number
   ): Phaser.Geom.Circle[] {
-    const distances: { node: Phaser.Geom.Circle; distance: number }[] = [];
+    const distances: { geomCircle: Phaser.Geom.Circle; distance: number }[] =
+      [];
     for (const node of this.nodes) {
-      if (node === sourceNode) continue; // Skip self
+      if (node.geomCircle === sourceNode.geomCircle) continue;
       const distance = Phaser.Math.Distance.Between(
-        sourceNode.x,
-        sourceNode.y,
-        node.x,
-        node.y
+        sourceNode.geomCircle.x,
+        sourceNode.geomCircle.y,
+        node.geomCircle.x,
+        node.geomCircle.y
       );
-      distances.push({ node, distance });
+      distances.push({ geomCircle: node.geomCircle, distance });
     }
 
     distances.sort((a, b) => a.distance - b.distance);
     return distances
       .slice(0, Math.min(maxConnections, distances.length))
-      .map((entry) => entry.node);
+      .map((entry) => entry.geomCircle);
   }
 
   public update(timestep: number, dt: number): void {

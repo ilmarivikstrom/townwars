@@ -2,47 +2,53 @@ import Phaser from "phaser";
 import { Color, toHexColor } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
 
-export default class Node extends Phaser.Geom.Circle {
-  private scene!: Phaser.Scene;
-  private graphics!: Phaser.GameObjects.Graphics;
+export default class Node extends Phaser.GameObjects.Container {
+  public drawableCircle!: Phaser.GameObjects.Arc;
+  public geomCircle!: Phaser.Geom.Circle;
   private tooltip!: Phaser.GameObjects.Text;
   private productionRate!: number;
-  private troops!: number;
+  private troopCount!: number;
   private troopCountText!: Phaser.GameObjects.Text;
   private pointLight!: Phaser.GameObjects.PointLight;
   private selected: boolean = false;
-  private isHovered: boolean = false;
+  private hovered: boolean = false;
   private owner: string = "";
 
-  private fillColor: number = Color.GAME_WINDOW;
+  private fillColor!: number;
 
   constructor(
     scene: Phaser.Scene,
-    graphics: Phaser.GameObjects.Graphics,
     x: number,
     y: number,
     productionRate: number,
     owner: string = ""
   ) {
-    super(x, y, 4 * productionRate + 15);
+    super(scene);
+    this.setOwnerAndColor(owner);
+    this.drawableCircle = scene.add.circle(
+      x,
+      y,
+      4 * productionRate + 15,
+      this.fillColor
+    );
+    this.drawableCircle.setStrokeStyle(4, Color.OUTSIDE);
+    this.drawableCircle.setDepth(Layers.NODE_BASE);
+
+    this.geomCircle = new Phaser.Geom.Circle(x, y, 4 * productionRate + 15);
+
     this.productionRate = productionRate;
-    this.scene = scene;
-    this.graphics = graphics;
 
-    this.graphics.setDepth(Layers.NODE_BASE);
-
-    this.setOwner(owner);
-    this.assignTroops();
-    this.createTooltip();
-    this.createTroopCountText();
-    this.createPointLight();
+    this.presetTroops();
+    this.createTooltip(scene);
+    this.createTroopCountText(scene);
+    this.createPointLight(scene);
   }
 
-  private createTooltip(): void {
-    this.tooltip = this.scene.add.text(
-      this.x,
-      this.y,
-      this.getUpdatedTooltipText(),
+  private createTooltip(scene: Phaser.Scene): void {
+    this.tooltip = scene.add.text(
+      this.drawableCircle.x,
+      this.drawableCircle.y,
+      this.parseUpdatedTooltipText(),
       {
         backgroundColor: toHexColor(Color.TOOLTIP_BACKGROUND),
         color: toHexColor(Color.TEXT_DEFAULT),
@@ -55,30 +61,30 @@ export default class Node extends Phaser.Geom.Circle {
     this.tooltip.setVisible(false);
   }
 
-  private assignTroops(): void {
+  private presetTroops(): void {
     if (this.owner === "") {
-      this.troops = Math.floor(Math.random() * 15 + 15);
+      this.troopCount = Math.floor(Math.random() * 15 + 15);
     } else {
-      this.troops = 0;
+      this.troopCount = 0;
     }
   }
 
-  private createTroopCountText(): void {
-    this.troopCountText = this.scene.add.text(
-      this.x,
-      this.y,
-      this.troops.toString()
+  private createTroopCountText(scene: Phaser.Scene): void {
+    this.troopCountText = scene.add.text(
+      this.drawableCircle.x,
+      this.drawableCircle.y,
+      this.troopCount.toString()
     );
     this.troopCountText.setOrigin(0.5, 0.5);
     this.troopCountText.setDepth(Layers.NODE_CONTENT);
   }
 
-  private createPointLight(): void {
-    this.pointLight = this.scene.add.pointlight(
-      this.x,
-      this.y,
+  private createPointLight(scene: Phaser.Scene): void {
+    this.pointLight = scene.add.pointlight(
+      this.geomCircle.x,
+      this.geomCircle.y,
       Color.ORANGE,
-      this.radius * 3,
+      this.geomCircle.radius * 3,
       0.2,
       0.05
     );
@@ -93,30 +99,23 @@ export default class Node extends Phaser.Geom.Circle {
     return this.selected;
   }
 
-  public setOwner(newOwner: string): void {
+  public setOwnerAndColor(newOwner: string): void {
     this.owner = newOwner;
     if (this.owner !== "") {
       this.fillColor = Color.DEFAULT_PLAYER_COLOR;
+    } else {
+      this.fillColor = Color.GRAY_DARK;
     }
   }
 
-  private getUpdatedTooltipText(): string {
+  private parseUpdatedTooltipText(): string {
     const tooltipText =
-      "x: " +
-      this.x.toFixed(0) +
-      "\n" +
-      "y: " +
-      this.y.toFixed(0) +
-      "\n" +
-      "r: " +
-      this.radius.toString() +
-      "\n\n" +
       "Production: " +
       this.productionRate.toString() +
       "/s" +
       "\n" +
       "Troops: " +
-      this.troops.toFixed(0) +
+      this.troopCount.toFixed(0) +
       "\nOwner: " +
       (this.owner === "" ? "None" : this.owner);
     return tooltipText;
@@ -127,31 +126,30 @@ export default class Node extends Phaser.Geom.Circle {
     dt: number,
     pointerCoords: Phaser.Geom.Point
   ): void {
-    if (this.contains(pointerCoords.x, pointerCoords.y)) {
-      this.isHovered = true;
+    if (this.geomCircle.contains(pointerCoords.x, pointerCoords.y)) {
+      this.hovered = true;
     } else {
-      this.isHovered = false;
+      this.hovered = false;
     }
 
-    const newTooltipText = this.getUpdatedTooltipText();
+    const newTooltipText = this.parseUpdatedTooltipText();
     const tooltipRows = newTooltipText.split("\n").length;
 
-    this.tooltip.x = pointerCoords.x;
     this.tooltip.y =
-      pointerCoords.y -
+      this.geomCircle.y -
       (2 * Config.PADDING_TEXT +
         tooltipRows * Config.SPACING_TEXT +
         tooltipRows * 14); // Offset by 2 * padding + 3 * row spacing + 3 * font height
 
     if (this.owner !== "") {
-      this.troops = this.troops + this.productionRate * (dt / 1000);
+      this.troopCount = this.troopCount + this.productionRate * (dt / 1000);
     }
-    this.troopCountText.setText(this.troops.toFixed(0));
+    this.troopCountText.setText(this.troopCount.toFixed(0));
     this.tooltip.setText(newTooltipText);
   }
 
   public getTroops(): number {
-    return this.troops;
+    return this.troopCount;
   }
 
   public getProductionRate(): number {
@@ -159,24 +157,19 @@ export default class Node extends Phaser.Geom.Circle {
   }
 
   public draw(): void {
-    if (this.selected) {
+    if ((this.hovered && this.selected) || this.selected) {
       this.pointLight.setVisible(true);
-      this.graphics.lineStyle(4, Color.ORANGE, 1.0);
-    } else {
-      this.pointLight.setVisible(false);
-      this.graphics.lineStyle(4, Color.GRAY, 0.5);
-    }
-    if (this.isHovered) {
+      this.tooltip.setVisible(true);
+    } else if (this.hovered) {
       this.tooltip.setVisible(true);
     } else {
+      this.pointLight.setVisible(false);
       this.tooltip.setVisible(false);
     }
-    this.graphics.fillStyle(this.fillColor);
-    this.graphics.fillCircleShape(this);
-    this.graphics.strokeCircleShape(this);
   }
 
   public destroyChildren(): void {
+    this.drawableCircle.destroy();
     this.tooltip.destroy();
     this.troopCountText.destroy();
     this.pointLight.destroy();
