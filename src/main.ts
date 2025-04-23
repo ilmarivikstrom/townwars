@@ -5,7 +5,7 @@ import MainMenu from "./scenes/MainMenu.js";
 
 const townwars = new Phaser.Game({
   ...GameConfig,
-  scene: [MainMenu, GameScene]
+  scene: [MainMenu, GameScene],
 });
 
 export default townwars;

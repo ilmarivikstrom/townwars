@@ -13,38 +13,15 @@ export default class GameScene extends Phaser.Scene {
   private statisticsUI!: StatisticsUI;
   private numEdges: integer = 0;
   private currentUserId: string = uuid();
-  private controlButton: boolean = false;
-  private shiftButton: boolean = false;
+  private ctrlButtonDown: boolean = false;
+  private shiftButtonDown: boolean = false;
+  private leftMouseDown: boolean = false;
 
   public constructor() {
     super("GameScene");
   }
 
   public preload(): void {}
-
-  private tryCreateNewNode(x: number, y: number, owner: string): void {
-    const productionRate = Math.floor(Math.random() * 5) + 1;
-    const testCircle = new Phaser.Geom.Circle(
-      x,
-      y,
-      4 * productionRate + 15
-    );
-
-    for (const node of this.nodes) {
-      if (Phaser.Geom.Intersects.CircleToCircle(node, testCircle)) {
-        return;
-      }
-    }
-    const newNode = new Node(
-      this,
-      this.graphics,
-      x,
-      y,
-      productionRate,
-      owner,
-    );
-    this.nodes.push(newNode);
-  }
 
   public create(): void {
     this.graphics = this.add.graphics();
@@ -54,16 +31,11 @@ export default class GameScene extends Phaser.Scene {
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.button === 0) {
-        for (const node of this.nodes) {
-          if (node.contains(pointer.x, pointer.y)) {
-            node.setSelected(!node.getSelected());
-          } else {
-            node.setSelected(false);
-          }
-        }
-        if (this.controlButton) {
+        this.leftMouseDown = true;
+        this.updateNodeSelection(pointer.x, pointer.y);
+        if (this.ctrlButtonDown) {
           this.tryCreateNewNode(pointer.x, pointer.y, "");
-        } else if (this.shiftButton) {
+        } else if (this.shiftButtonDown) {
           this.tryCreateNewNode(pointer.x, pointer.y, this.currentUserId);
         }
       } else if (pointer.button === 2) {
@@ -75,6 +47,16 @@ export default class GameScene extends Phaser.Scene {
           }
         }
       }
+    });
+
+    this.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+      if (pointer.button === 0) {
+        this.leftMouseDown = false;
+      }
+    });
+
+    this.input.on("dragstart", (pointer: Phaser.Input.Pointer) => {
+      console.log("Drag start!");
     });
 
     this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
@@ -91,20 +73,43 @@ export default class GameScene extends Phaser.Scene {
     });
 
     this.input.keyboard?.on("keydown-CTRL", () => {
-      this.controlButton = true;
+      this.ctrlButtonDown = true;
     });
 
     this.input.keyboard?.on("keyup-CTRL", () => {
-      this.controlButton = false;
+      this.ctrlButtonDown = false;
     });
 
     this.input.keyboard?.on("keydown-SHIFT", () => {
-      this.shiftButton = true;
+      this.shiftButtonDown = true;
     });
 
     this.input.keyboard?.on("keyup-SHIFT", () => {
-      this.shiftButton = false;
+      this.shiftButtonDown = false;
     });
+  }
+
+  private updateNodeSelection(x: number, y: number): void {
+    for (const node of this.nodes) {
+      if (node.contains(x, y)) {
+        node.setSelected(true);
+      } else {
+        node.setSelected(false);
+      }
+    }
+  }
+
+  private tryCreateNewNode(x: number, y: number, owner: string): void {
+    const productionRate = Math.floor(Math.random() * 5) + 1;
+    const testCircle = new Phaser.Geom.Circle(x, y, 4 * productionRate + 15);
+
+    for (const node of this.nodes) {
+      if (Phaser.Geom.Intersects.CircleToCircle(node, testCircle)) {
+        return;
+      }
+    }
+    const newNode = new Node(this, this.graphics, x, y, productionRate, owner);
+    this.nodes.push(newNode);
   }
 
   private deleteNodes(): void {

@@ -22,17 +22,23 @@ export default class Node extends Phaser.Geom.Circle {
     x: number,
     y: number,
     productionRate: number,
-    owner: string = "",
+    owner: string = ""
   ) {
     super(x, y, 4 * productionRate + 15);
     this.productionRate = productionRate;
-    this.troops = 0;
     this.scene = scene;
     this.graphics = graphics;
 
-    this.setOwner(owner);
-
     this.graphics.setDepth(Layers.NODE_BASE);
+
+    this.setOwner(owner);
+    this.assignTroops();
+    this.createTooltip();
+    this.createTroopCountText();
+    this.createPointLight();
+  }
+
+  private createTooltip(): void {
     this.tooltip = this.scene.add.text(
       this.x,
       this.y,
@@ -47,11 +53,17 @@ export default class Node extends Phaser.Geom.Circle {
     this.tooltip.setDepth(Layers.NODE_TOOLTIP);
     this.tooltip.setAlpha(0.8);
     this.tooltip.setVisible(false);
+  }
 
+  private assignTroops(): void {
     if (this.owner === "") {
       this.troops = Math.floor(Math.random() * 15 + 15);
+    } else {
+      this.troops = 0;
     }
+  }
 
+  private createTroopCountText(): void {
     this.troopCountText = this.scene.add.text(
       this.x,
       this.y,
@@ -59,7 +71,9 @@ export default class Node extends Phaser.Geom.Circle {
     );
     this.troopCountText.setOrigin(0.5, 0.5);
     this.troopCountText.setDepth(Layers.NODE_CONTENT);
+  }
 
+  private createPointLight(): void {
     this.pointLight = this.scene.add.pointlight(
       this.x,
       this.y,
