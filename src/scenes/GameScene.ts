@@ -5,6 +5,7 @@ import DragIndicator from "../entities/DragIndicator.js";
 import Node from "../entities/Node.js";
 import StatisticsUI from "../ui/StatisticsUI.js";
 import { Color } from "../utils/Color.js";
+import { findNodeAtPoint, nodeContainsPoint } from "../utils/Math.js";
 
 export default class GameScene extends Phaser.Scene {
   private nodes: Node[] = [];
@@ -60,49 +61,38 @@ export default class GameScene extends Phaser.Scene {
       }
       this.dragIndicator = new DragIndicator(
         this,
-        node.geomCircle.x,
-        node.geomCircle.y,
+        node.x,
+        node.y,
         pointer.x,
         pointer.y
       );
       this.dragIndicator.setVisible(true);
-
-      for (const candidateNode of this.nodes) {
-        if (candidateNode === node) {
-          continue;
-        }
-        if (candidateNode.geomCircle.contains(pointer.x, pointer.y)) {
-          console.log("Set the fill style to...");
-        }
-      }
     });
 
     this.events.on(
       "nodeDragEnd",
       (dragNode: Node, pointer: Phaser.Input.Pointer) => {
-        for (const node of this.nodes) {
-          if (!node.geomCircle.contains(pointer.x, pointer.y)) {
-            continue;
-          }
-          const currentTroops = dragNode.getTroops();
-          const newTroopCount = currentTroops * 0.5;
-          const difference = currentTroops - newTroopCount;
+        const targetNode = findNodeAtPoint(this.nodes, pointer.x, pointer.y);
+        if (targetNode === null) {
+          return;
+        }
+        const currentTroops = dragNode.getTroops();
+        const newTroopCount = currentTroops * 0.5;
+        const difference = currentTroops - newTroopCount;
 
-          if (dragNode.getOwner() !== node.getOwner()) {
-            console.log("Attempting to attack");
-            dragNode.setTroops(newTroopCount);
-            node.setTroops(node.getTroops() - difference);
-            // Conquer
-            if (node.getTroops() < 0) {
-              node.setOwnerAndColor(this.currentUserId);
-              node.setTroops(node.getTroops() * -1);
-            }
-            break;
-          } else {
-            console.log("Attempting to move troops.");
-            dragNode.setTroops(newTroopCount);
-            node.setTroops(node.getTroops() + difference);
+        // Attack a non-friendly node
+        if (dragNode.owner !== targetNode.owner) {
+          dragNode.setTroops(newTroopCount);
+          targetNode.setTroops(targetNode.getTroops() - difference);
+          // Conquer the node
+          if (targetNode.getTroops() < 0) {
+            targetNode.setOwnerAndColor(this.currentUserId);
+            targetNode.setTroops(targetNode.getTroops() * -1);
           }
+          // Move troops among friendly nodes
+        } else {
+          dragNode.setTroops(newTroopCount);
+          targetNode.setTroops(targetNode.getTroops() + difference);
         }
         this.dragIndicator.destroy();
       }
@@ -153,7 +143,9 @@ export default class GameScene extends Phaser.Scene {
     const testCircle = new Phaser.Geom.Circle(x, y, 4 * productionRate + 15);
 
     for (const node of this.nodes) {
-      if (Phaser.Geom.Intersects.CircleToCircle(node.geomCircle, testCircle)) {
+      if (
+        Phaser.Geom.Intersects.CircleToRectangle(testCircle, node.getBounds())
+      ) {
         return;
       }
     }
@@ -176,21 +168,14 @@ export default class GameScene extends Phaser.Scene {
 
     // FIXME: Ensure no overlapping edges are ever created.
     for (const node of this.nodes) {
-      if (
-        node.geomCircle.contains(this.pointerCoords.x, this.pointerCoords.y)
-      ) {
+      if (nodeContainsPoint(node, this.pointerCoords.x, this.pointerCoords.y)) {
         this.graphics.lineStyle(4, Color.RED, 1.0);
       } else {
         this.graphics.lineStyle(4, Color.GREEN, 0.4);
       }
       const closestNodes = this.getClosestNodes(node, 2);
       for (const targetNode of closestNodes) {
-        this.graphics.lineBetween(
-          node.geomCircle.x,
-          node.geomCircle.y,
-          targetNode.x,
-          targetNode.y
-        );
+        this.graphics.lineBetween(node.x, node.y, targetNode.x, targetNode.y);
         this.numEdges += 1;
       }
     }
@@ -200,27 +185,25 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  private getClosestNodes(
-    sourceNode: Node,
-    maxConnections: number
-  ): Phaser.Geom.Circle[] {
-    const distances: { geomCircle: Phaser.Geom.Circle; distance: number }[] =
-      [];
+  private getClosestNodes(sourceNode: Node, maxConnections: number): Node[] {
+    const distances: { circle: Node; distance: number }[] = [];
     for (const node of this.nodes) {
-      if (node.geomCircle === sourceNode.geomCircle) continue;
       const distance = Phaser.Math.Distance.Between(
-        sourceNode.geomCircle.x,
-        sourceNode.geomCircle.y,
-        node.geomCircle.x,
-        node.geomCircle.y
+        sourceNode.x,
+        sourceNode.y,
+        node.x,
+        node.y
       );
-      distances.push({ geomCircle: node.geomCircle, distance });
+      if (distance == 0) {
+        continue;
+      }
+      distances.push({ circle: node, distance });
     }
 
     distances.sort((a, b) => a.distance - b.distance);
     return distances
       .slice(0, Math.min(maxConnections, distances.length))
-      .map((entry) => entry.geomCircle);
+      .map((entry) => entry.circle);
   }
 
   public update(timestep: number, dt: number): void {
@@ -234,7 +217,7 @@ export default class GameScene extends Phaser.Scene {
     );
     this.statisticsUI.update(timestep, dt, this.nodes, this.currentUserId);
     for (const node of this.nodes) {
-      node.update(timestep, dt, this.pointerCoords);
+      node.update(timestep, dt);
     }
     this.drawNodeGraph();
   }

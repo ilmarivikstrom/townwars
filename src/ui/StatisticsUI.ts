@@ -41,7 +41,7 @@ export default class StatisticsUI {
     let totalTroops = 0;
     let productionRate = 0;
     for (const node of nodes) {
-      if (node.getOwner() === currentUserId) {
+      if (node.owner === currentUserId) {
         totalTroops += node.getTroops();
         productionRate += node.getProductionRate();
       }
