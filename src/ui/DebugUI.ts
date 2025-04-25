@@ -50,9 +50,11 @@ export default class DebugUI {
         numEdges.toString() +
         "\nPlayer ID: " +
         userId +
-        "\n\nPress 'D' to toggle this UI" +
-        "\nPress 'C' to clear graph" +
-        "\nPress RMB to delete a node"
+        "\n\nCTRL + LMB to place a vacant node" +
+        "\nSHIFT + LMB to place your node" +
+        "\nRMB to delete a node" +
+        "\n'C' to clear graph" +
+        "\n\n'D' to toggle this UI"
     );
   }
 

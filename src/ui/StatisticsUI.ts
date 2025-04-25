@@ -32,12 +32,19 @@ export default class StatisticsUI {
     this.text.setVisible(!this.text.visible);
   }
 
-  public update(timestep: number, dt: number, nodes: Node[]): void {
+  public update(
+    timestep: number,
+    dt: number,
+    nodes: Node[],
+    currentUserId: string
+  ): void {
     let totalTroops = 0;
     let productionRate = 0;
     for (const node of nodes) {
-      totalTroops += node.getTroops();
-      productionRate += node.getProductionRate();
+      if (node.getOwner() === currentUserId) {
+        totalTroops += node.getTroops();
+        productionRate += node.getProductionRate();
+      }
     }
     const totalTroopsCompact = formatCompactNumber(totalTroops);
     this.text.setText(

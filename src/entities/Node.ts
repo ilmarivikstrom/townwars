@@ -24,16 +24,18 @@ export default class Node extends Phaser.GameObjects.Container {
     owner: string = ""
   ) {
     super(scene);
-    this.setOwnerAndColor(owner);
     this.drawableCircle = scene.add.circle(
       x,
       y,
       4 * productionRate + 15,
       this.fillColor
     );
+
     this.drawableCircle.setStrokeStyle(4, Color.OUTSIDE);
     this.drawableCircle.setDepth(Layers.NODE_BASE);
     this.drawableCircle.setInteractive({ draggable: true });
+
+    this.setOwnerAndColor(owner);
 
     this.drawableCircle.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.button === 0) {
@@ -127,9 +129,10 @@ export default class Node extends Phaser.GameObjects.Container {
   public setOwnerAndColor(newOwner: string): void {
     this.owner = newOwner;
     if (this.owner !== "") {
-      this.fillColor = Color.DEFAULT_PLAYER_COLOR;
+      this.drawableCircle.setFillStyle(Color.DEFAULT_PLAYER_COLOR);
+      console.log("Setting fill color to player color");
     } else {
-      this.fillColor = Color.GRAY_DARK;
+      this.drawableCircle.setFillStyle(Color.GRAY_DARK);
     }
   }
 

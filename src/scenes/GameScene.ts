@@ -87,19 +87,22 @@ export default class GameScene extends Phaser.Scene {
           if (!node.geomCircle.contains(pointer.x, pointer.y)) {
             continue;
           }
+          const currentTroops = dragNode.getTroops();
+          const newTroopCount = currentTroops * 0.5;
+          const difference = currentTroops - newTroopCount;
+
           if (dragNode.getOwner() !== node.getOwner()) {
             console.log("Attempting to attack");
-            const currentTroops = dragNode.getTroops();
-            const newTroopCount = currentTroops * 0.5;
-            const difference = currentTroops - newTroopCount;
             dragNode.setTroops(newTroopCount);
             node.setTroops(node.getTroops() - difference);
+            // Conquer
+            if (node.getTroops() < 0) {
+              node.setOwnerAndColor(this.currentUserId);
+              node.setTroops(node.getTroops() * -1);
+            }
             break;
           } else {
             console.log("Attempting to move troops.");
-            const currentTroops = dragNode.getTroops();
-            const newTroopCount = currentTroops * 0.5;
-            const difference = currentTroops - newTroopCount;
             dragNode.setTroops(newTroopCount);
             node.setTroops(node.getTroops() + difference);
           }
@@ -233,7 +236,7 @@ export default class GameScene extends Phaser.Scene {
       this.numEdges,
       this.currentUserId
     );
-    this.statisticsUI.update(timestep, dt, this.nodes);
+    this.statisticsUI.update(timestep, dt, this.nodes, this.currentUserId);
     for (const node of this.nodes) {
       node.update(timestep, dt, this.pointerCoords);
     }
