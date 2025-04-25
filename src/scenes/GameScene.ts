@@ -54,7 +54,6 @@ export default class GameScene extends Phaser.Scene {
     });
 
     this.events.on("nodeDrag", (node: Node, pointer: Phaser.Input.Pointer) => {
-      this.dragIndicator.destroyChildren();
       this.dragIndicator.destroy();
       if (!node.isOwnedByUser(this.currentUserId)) {
         return;
@@ -67,8 +66,6 @@ export default class GameScene extends Phaser.Scene {
         pointer.y
       );
       this.dragIndicator.setVisible(true);
-
-      this.dragIndicator.line.setFillStyle(Color.GRAY_LIGHT);
 
       for (const candidateNode of this.nodes) {
         if (candidateNode === node) {
@@ -107,7 +104,6 @@ export default class GameScene extends Phaser.Scene {
             node.setTroops(node.getTroops() + difference);
           }
         }
-        this.dragIndicator.destroyChildren();
         this.dragIndicator.destroy();
       }
     );
