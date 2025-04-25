@@ -14,8 +14,6 @@ export default class Node extends Phaser.GameObjects.Container {
   private hovered: boolean = false;
   private owner: string = "";
 
-  private fillColor!: number;
-
   constructor(
     scene: Phaser.Scene,
     x: number,
@@ -24,12 +22,7 @@ export default class Node extends Phaser.GameObjects.Container {
     owner: string = ""
   ) {
     super(scene);
-    this.drawableCircle = scene.add.circle(
-      x,
-      y,
-      4 * productionRate + 15,
-      this.fillColor
-    );
+    this.drawableCircle = scene.add.circle(x, y, 4 * productionRate + 15);
 
     this.drawableCircle.setStrokeStyle(4, Color.OUTSIDE);
     this.drawableCircle.setDepth(Layers.NODE_BASE);
@@ -132,7 +125,7 @@ export default class Node extends Phaser.GameObjects.Container {
       this.drawableCircle.setFillStyle(Color.DEFAULT_PLAYER_COLOR);
       console.log("Setting fill color to player color");
     } else {
-      this.drawableCircle.setFillStyle(Color.GRAY_DARK);
+      this.drawableCircle.setFillStyle(Color.NODE_DEFAULT);
     }
   }
 

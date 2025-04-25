@@ -9,7 +9,7 @@ export const Color: Record<string, number> = {
   TEXT_DEFAULT: 0xa9b1d6,
   TOOLTIP_BACKGROUND: 0x15161f,
   GRAY_LIGHT: 0x999999,
-  GRAY_DARK: 0x444444,
+  NODE_DEFAULT: 0x444444,
   GREEN: 0x9ece6a,
   ORANGE: 0xff9e64,
   PURPLE: 0xbb9af7,
