@@ -1,12 +1,14 @@
 import { v4 as uuid } from "uuid";
 import Phaser from "phaser";
 import DebugUI from "../ui/DebugUI.js";
+import DragIndicator from "../entities/DragIndicator.js";
 import Node from "../entities/Node.js";
 import StatisticsUI from "../ui/StatisticsUI.js";
 import { Color } from "../utils/Color.js";
 
 export default class GameScene extends Phaser.Scene {
   private nodes: Node[] = [];
+  private dragIndicator!: DragIndicator;
   private graphics!: Phaser.GameObjects.Graphics;
   private pointerCoords: Phaser.Geom.Point = new Phaser.Geom.Point(-1, -1);
   private debugUI!: DebugUI;
@@ -15,7 +17,6 @@ export default class GameScene extends Phaser.Scene {
   private currentUserId: string = uuid();
   private ctrlButtonDown: boolean = false;
   private shiftButtonDown: boolean = false;
-  private leftMouseDown: boolean = false;
 
   public constructor() {
     super("GameScene");
@@ -26,34 +27,87 @@ export default class GameScene extends Phaser.Scene {
   public create(): void {
     this.graphics = this.add.graphics();
 
+    this.dragIndicator = new DragIndicator(this, 0, 0, 0, 0);
+
     this.debugUI = new DebugUI(this);
     this.statisticsUI = new StatisticsUI(this);
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.button === 0) {
-        this.leftMouseDown = true;
-        this.updateNodeSelection(pointer.x, pointer.y);
         if (this.ctrlButtonDown) {
           this.tryCreateNewNode(pointer.x, pointer.y, "");
         } else if (this.shiftButtonDown) {
           this.tryCreateNewNode(pointer.x, pointer.y, this.currentUserId);
         }
-      } else if (pointer.button === 2) {
-        for (const [index, node] of this.nodes.entries()) {
-          if (node.geomCircle.contains(pointer.x, pointer.y)) {
-            node.destroyChildren();
-            this.nodes.splice(index, 1);
-            return;
-          }
+      }
+    });
+
+    this.events.on("nodeSelect", (targetNode: Node) => {
+      this.selectOnly(targetNode);
+    });
+
+    this.events.on("nodeDelete", (targetNode: Node) => {
+      targetNode.destroyChildren();
+      this.nodes = this.nodes.filter(
+        (candidateNode) => candidateNode !== targetNode
+      );
+    });
+
+    this.events.on("nodeDrag", (node: Node, pointer: Phaser.Input.Pointer) => {
+      this.dragIndicator.destroyChildren();
+      this.dragIndicator.destroy();
+      if (!node.isOwnedByUser(this.currentUserId)) {
+        return;
+      }
+      this.dragIndicator = new DragIndicator(
+        this,
+        node.geomCircle.x,
+        node.geomCircle.y,
+        pointer.x,
+        pointer.y
+      );
+      this.dragIndicator.setVisible(true);
+
+      this.dragIndicator.line.setFillStyle(Color.GRAY_LIGHT);
+
+      for (const candidateNode of this.nodes) {
+        if (candidateNode === node) {
+          continue;
+        }
+        if (candidateNode.geomCircle.contains(pointer.x, pointer.y)) {
+          console.log("Set the fill style to...");
         }
       }
     });
 
-    this.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-      if (pointer.button === 0) {
-        this.leftMouseDown = false;
+    this.events.on(
+      "nodeDragEnd",
+      (dragNode: Node, pointer: Phaser.Input.Pointer) => {
+        for (const node of this.nodes) {
+          if (!node.geomCircle.contains(pointer.x, pointer.y)) {
+            continue;
+          }
+          if (dragNode.getOwner() !== node.getOwner()) {
+            console.log("Attempting to attack");
+            const currentTroops = dragNode.getTroops();
+            const newTroopCount = currentTroops * 0.5;
+            const difference = currentTroops - newTroopCount;
+            dragNode.setTroops(newTroopCount);
+            node.setTroops(node.getTroops() - difference);
+            break;
+          } else {
+            console.log("Attempting to move troops.");
+            const currentTroops = dragNode.getTroops();
+            const newTroopCount = currentTroops * 0.5;
+            const difference = currentTroops - newTroopCount;
+            dragNode.setTroops(newTroopCount);
+            node.setTroops(node.getTroops() + difference);
+          }
+        }
+        this.dragIndicator.destroyChildren();
+        this.dragIndicator.destroy();
       }
-    });
+    );
 
     this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
       this.pointerCoords.x = pointer.x;
@@ -85,9 +139,9 @@ export default class GameScene extends Phaser.Scene {
     });
   }
 
-  private updateNodeSelection(x: number, y: number): void {
+  private selectOnly(nodeToSelect: Node): void {
     for (const node of this.nodes) {
-      if (node.geomCircle.contains(x, y)) {
+      if (node === nodeToSelect) {
         node.setSelected(true);
       } else {
         node.setSelected(false);
@@ -107,6 +161,7 @@ export default class GameScene extends Phaser.Scene {
 
     const newNode = new Node(this, x, y, productionRate, owner);
     this.nodes.push(newNode);
+    this.selectOnly(newNode);
   }
 
   private deleteNodes(): void {

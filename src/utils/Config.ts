@@ -10,6 +10,7 @@ export enum Layers {
   BACKGROUND,
   EDGE,
   NODE_LIGHT,
+  DRAG_LINE,
   NODE_BASE,
   NODE_CONTENT,
   NODE_TOOLTIP,

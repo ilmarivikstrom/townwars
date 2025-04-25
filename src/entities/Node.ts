@@ -33,6 +33,23 @@ export default class Node extends Phaser.GameObjects.Container {
     );
     this.drawableCircle.setStrokeStyle(4, Color.OUTSIDE);
     this.drawableCircle.setDepth(Layers.NODE_BASE);
+    this.drawableCircle.setInteractive({ draggable: true });
+
+    this.drawableCircle.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+      if (pointer.button === 0) {
+        this.scene.events.emit("nodeSelect", this);
+      } else if (pointer.button === 2) {
+        this.scene.events.emit("nodeDelete", this);
+      }
+    });
+
+    this.drawableCircle.on("drag", (pointer: Phaser.Input.Pointer) => {
+      this.scene.events.emit("nodeDrag", this, pointer);
+    });
+
+    this.drawableCircle.on("dragend", (pointer: Phaser.Input.Pointer) => {
+      this.scene.events.emit("nodeDragEnd", this, pointer);
+    });
 
     this.geomCircle = new Phaser.Geom.Circle(x, y, 4 * productionRate + 15);
 
@@ -42,6 +59,10 @@ export default class Node extends Phaser.GameObjects.Container {
     this.createTooltip(scene);
     this.createTroopCountText(scene);
     this.createPointLight(scene);
+  }
+
+  public isOwnedByUser(userId: string): boolean {
+    return this.owner == userId;
   }
 
   private createTooltip(scene: Phaser.Scene): void {
@@ -93,6 +114,10 @@ export default class Node extends Phaser.GameObjects.Container {
 
   public setSelected(selected: boolean): void {
     this.selected = selected;
+  }
+
+  public getOwner(): string {
+    return this.owner;
   }
 
   public getSelected(): boolean {
@@ -150,6 +175,10 @@ export default class Node extends Phaser.GameObjects.Container {
 
   public getTroops(): number {
     return this.troopCount;
+  }
+
+  public setTroops(newTroopCount: number): void {
+    this.troopCount = newTroopCount;
   }
 
   public getProductionRate(): number {
