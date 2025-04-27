@@ -18,8 +18,13 @@ export default class Node extends Phaser.GameObjects.Arc {
     productionRate: number,
     owner: string = ""
   ) {
-    super(scene, x, y, 4 * productionRate + 15);
+    super(scene, x, y, 15);
     scene.add.existing(this);
+    this.productionRate = productionRate;
+    this.setOwnerAndColor(owner);
+
+    this.presetTroops();
+    this.setRadius(Math.sqrt((this.troopCount * 4) / Math.PI) + 15);
 
     this.setStrokeStyle(4, Color.OUTSIDE);
     this.setDepth(Layers.NODE_BASE);
@@ -27,7 +32,7 @@ export default class Node extends Phaser.GameObjects.Arc {
       hitArea: new Phaser.Geom.Circle(
         this.width / 2,
         this.height / 2,
-        4 * productionRate + 15
+        this.radius
       ),
       // eslint-disable-next-line @typescript-eslint/unbound-method
       hitAreaCallback: Phaser.Geom.Circle.Contains,
@@ -43,8 +48,6 @@ export default class Node extends Phaser.GameObjects.Arc {
       this.pointLight.setVisible(false);
       this.tooltip.setVisible(false);
     });
-
-    this.setOwnerAndColor(owner);
 
     this.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.button === 0) {
@@ -62,9 +65,6 @@ export default class Node extends Phaser.GameObjects.Arc {
       this.scene.events.emit("nodeDragEnd", this, pointer);
     });
 
-    this.productionRate = productionRate;
-
-    this.presetTroops();
     this.createTooltip(scene);
     this.createTroopCountText(scene);
     this.createPointLight(scene);
@@ -161,6 +161,10 @@ export default class Node extends Phaser.GameObjects.Arc {
     if (this.owner !== "") {
       this.troopCount = this.troopCount + this.productionRate * (dt / 1000);
     }
+
+    this.setRadius(Math.sqrt((this.troopCount * 4) / Math.PI) + 15);
+    this.input?.hitArea.setTo(this.width / 2, this.height / 2, this.radius);
+
     this.troopCountText.setText(this.troopCount.toFixed(0));
     this.tooltip.setText(newTooltipText);
   }

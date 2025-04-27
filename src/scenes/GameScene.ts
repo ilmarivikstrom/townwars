@@ -74,6 +74,7 @@ export default class GameScene extends Phaser.Scene {
       (dragNode: Node, pointer: Phaser.Input.Pointer) => {
         const targetNode = findNodeAtPoint(this.nodes, pointer.x, pointer.y);
         if (targetNode === null) {
+          this.dragIndicator.destroy();
           return;
         }
         const currentTroops = dragNode.getTroops();
