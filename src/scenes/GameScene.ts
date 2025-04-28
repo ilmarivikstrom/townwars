@@ -5,17 +5,15 @@ import DragIndicator from "../entities/DragIndicator.js";
 import Node from "../entities/Node.js";
 import StatisticsUI from "../ui/StatisticsUI.js";
 import { Color } from "../utils/Color.js";
-import { findNodeAtPoint, nodeContainsPoint } from "../utils/Math.js";
+import { findNodeAtPoint } from "../utils/Math.js";
 
 export default class GameScene extends Phaser.Scene {
   private nodes: Node[] = [];
   private edges: Phaser.GameObjects.Line[] = [];
   private dragIndicator!: DragIndicator;
-  // private graphics!: Phaser.GameObjects.Graphics;
   private pointerCoords: Phaser.Geom.Point = new Phaser.Geom.Point(-1, -1);
   private debugUI!: DebugUI;
   private statisticsUI!: StatisticsUI;
-  private numEdges: integer = 0;
   private currentUserId: string = uuid();
   private ctrlButtonDown: boolean = false;
   private shiftButtonDown: boolean = false;
@@ -27,8 +25,6 @@ export default class GameScene extends Phaser.Scene {
   public preload(): void {}
 
   public create(): void {
-    // this.graphics = this.add.graphics();
-
     this.dragIndicator = new DragIndicator(this, 0, 0, 0, 0);
 
     this.debugUI = new DebugUI(this);
@@ -38,8 +34,10 @@ export default class GameScene extends Phaser.Scene {
       if (pointer.button === 0) {
         if (this.ctrlButtonDown) {
           this.tryCreateNewNode(pointer.x, pointer.y, "");
+          this.createEdges();
         } else if (this.shiftButtonDown) {
           this.tryCreateNewNode(pointer.x, pointer.y, this.currentUserId);
+          this.createEdges();
         }
       }
     });
@@ -50,9 +48,11 @@ export default class GameScene extends Phaser.Scene {
 
     this.events.on("nodeDelete", (targetNode: Node) => {
       targetNode.destroyChildren();
+      targetNode.destroy();
       this.nodes = this.nodes.filter(
         (candidateNode) => candidateNode !== targetNode
       );
+      this.createEdges();
     });
 
     this.events.on("nodeDrag", (node: Node, pointer: Phaser.Input.Pointer) => {
@@ -97,6 +97,7 @@ export default class GameScene extends Phaser.Scene {
           targetNode.setTroops(targetNode.getTroops() + difference);
         }
         this.dragIndicator.destroy();
+        this.createEdges();
       }
     );
 
@@ -143,7 +144,6 @@ export default class GameScene extends Phaser.Scene {
   private tryCreateNewNode(x: number, y: number, owner: string): void {
     const productionRate = Math.floor(Math.random() * 5) + 1;
     const testCircle = new Phaser.Geom.Circle(x, y, 50); // Try placing with default margin.
-
     for (const node of this.nodes) {
       if (
         Phaser.Geom.Intersects.CircleToRectangle(testCircle, node.getBounds())
@@ -151,11 +151,8 @@ export default class GameScene extends Phaser.Scene {
         return;
       }
     }
-
     const newNode = new Node(this, x, y, productionRate, owner);
     this.nodes.push(newNode);
-    this.createEdges();
-    this.selectOnly(newNode);
   }
 
   private deleteNodes(): void {
@@ -180,7 +177,10 @@ export default class GameScene extends Phaser.Scene {
     for (const node of this.nodes) {
       const closestNodes = this.getClosestNodes(node, 2);
       for (const targetNode of closestNodes) {
-        // this.graphics.lineBetween(node.x, node.y, targetNode.x, targetNode.y);
+        const edgeColor =
+          node.owner !== "" && targetNode.owner !== ""
+            ? Color.DEFAULT_PLAYER_COLOR
+            : Color.OUTSIDE;
         const edge = new Phaser.GameObjects.Line(
           this,
           0,
@@ -189,9 +189,10 @@ export default class GameScene extends Phaser.Scene {
           node.y,
           targetNode.x,
           targetNode.y,
-          Color.GREEN,
+          edgeColor,
           1.0
         );
+        edge.setLineWidth(4);
         edge.setOrigin(0, 0);
         newEdges.push(edge);
       }
@@ -222,29 +223,6 @@ export default class GameScene extends Phaser.Scene {
       seen.add(key);
       return true;
     });
-  }
-
-  private drawNodeGraph(): void {
-    // this.numEdges = 0;
-    // this.graphics.clear();
-
-    // // FIXME: Ensure no overlapping edges are ever created.
-    // for (const node of this.nodes) {
-    //   if (nodeContainsPoint(node, this.pointerCoords.x, this.pointerCoords.y)) {
-    //     this.graphics.lineStyle(4, Color.RED, 1.0);
-    //   } else {
-    //     this.graphics.lineStyle(4, Color.GREEN, 0.4);
-    //   }
-    //   const closestNodes = this.getClosestNodes(node, 2);
-    //   for (const targetNode of closestNodes) {
-    //     this.graphics.lineBetween(node.x, node.y, targetNode.x, targetNode.y);
-    //     this.numEdges += 1;
-    //   }
-    // }
-
-    for (const node of this.nodes) {
-      node.draw();
-    }
   }
 
   private getClosestNodes(sourceNode: Node, maxConnections: number): Node[] {
@@ -281,6 +259,5 @@ export default class GameScene extends Phaser.Scene {
     for (const node of this.nodes) {
       node.update(timestep, dt);
     }
-    this.drawNodeGraph();
   }
 }

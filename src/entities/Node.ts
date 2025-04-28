@@ -26,7 +26,33 @@ export default class Node extends Phaser.GameObjects.Arc {
     this.presetTroops();
     this.setRadius(Math.sqrt((this.troopCount * 4) / Math.PI) + 15);
 
-    this.setStrokeStyle(4, Color.OUTSIDE);
+    const strokeWidth = 5;
+    const strokeAlpha = this.owner == "" ? 0.5 : 1.0;
+
+    switch (this.productionRate) {
+      case 1:
+        this.setStrokeStyle(strokeWidth, Color.BRONZE, strokeAlpha);
+        break;
+      case 2:
+        this.setStrokeStyle(strokeWidth, Color.SILVER, strokeAlpha);
+        break;
+      case 3:
+        this.setStrokeStyle(strokeWidth, Color.GOLD, strokeAlpha);
+        break;
+      case 4:
+        this.setStrokeStyle(strokeWidth, Color.PLATINUM, strokeAlpha);
+        break;
+      case 5:
+        this.setStrokeStyle(strokeWidth, Color.DIAMOND, strokeAlpha);
+        break;
+      default:
+        console.log(
+          "Color not mapped for production rate " +
+            this.productionRate.toString()
+        );
+        this.setStrokeStyle(strokeWidth, Color.OUTSIDE, strokeAlpha);
+    }
+
     this.setDepth(Layers.NODE_BASE);
     this.setInteractive({
       hitArea: new Phaser.Geom.Circle(
@@ -40,12 +66,10 @@ export default class Node extends Phaser.GameObjects.Arc {
     });
 
     this.on("pointerover", () => {
-      this.pointLight.setVisible(true);
       this.tooltip.setVisible(true);
     });
 
     this.on("pointerout", () => {
-      this.pointLight.setVisible(false);
       this.tooltip.setVisible(false);
     });
 
@@ -113,8 +137,8 @@ export default class Node extends Phaser.GameObjects.Arc {
     this.pointLight = scene.add.pointlight(
       this.x,
       this.y,
-      Color.ORANGE,
-      this.radius * 3,
+      Color.DEFAULT_PLAYER_COLOR,
+      this.radius * 5,
       0.2,
       0.05
     );
@@ -131,7 +155,7 @@ export default class Node extends Phaser.GameObjects.Arc {
       this.setFillStyle(Color.DEFAULT_PLAYER_COLOR);
       console.log("Setting fill color to player color");
     } else {
-      this.setFillStyle(Color.NODE_DEFAULT);
+      this.setFillStyle(Color.GAME_WINDOW);
     }
   }
 
@@ -171,12 +195,24 @@ export default class Node extends Phaser.GameObjects.Arc {
       throw new Error("Node `input` is null. Exiting...");
     }
 
+    this.updatePointLight();
+
+    if (this.owner == "") {
+      this.pointLight.setVisible(false);
+    } else {
+      this.pointLight.setVisible(true);
+    }
+
     this.troopCountText.setText(this.troopCount.toFixed(0));
     this.tooltip.setText(newTooltipText);
   }
 
   public getTroops(): number {
     return this.troopCount;
+  }
+
+  private updatePointLight(): void {
+    this.pointLight.radius = this.radius * 5;
   }
 
   public setTroops(newTroopCount: number): void {
@@ -186,8 +222,6 @@ export default class Node extends Phaser.GameObjects.Arc {
   public getProductionRate(): number {
     return this.productionRate;
   }
-
-  public draw(): void {}
 
   public destroyChildren(): void {
     this.tooltip.destroy();

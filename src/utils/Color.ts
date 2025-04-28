@@ -15,4 +15,9 @@ export const Color: Record<string, number> = {
   PURPLE: 0xbb9af7,
   RED: 0xf7768e,
   YELLOW: 0xe0af68,
+  BRONZE: 0xb4815b,
+  SILVER: 0x8d989b,
+  GOLD: 0xd6bf77,
+  PLATINUM: 0x7bd1d8,
+  DIAMOND: 0xa588f4,
 };
