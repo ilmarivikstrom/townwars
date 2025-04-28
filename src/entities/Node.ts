@@ -10,6 +10,7 @@ export default class Node extends Phaser.GameObjects.Arc {
   private pointLight!: Phaser.GameObjects.PointLight;
   public selected: boolean = false;
   public owner: string = "";
+  private attritionRate!: number;
 
   constructor(
     scene: Phaser.Scene,
@@ -21,6 +22,7 @@ export default class Node extends Phaser.GameObjects.Arc {
     super(scene, x, y, 15);
     scene.add.existing(this);
     this.productionRate = productionRate;
+    this.updateAttritionRate();
     this.setOwnerAndColor(owner);
 
     this.presetTroops();
@@ -96,6 +98,11 @@ export default class Node extends Phaser.GameObjects.Arc {
 
   public isOwnedByUser(userId: string): boolean {
     return this.owner == userId;
+  }
+
+  private updateAttritionRate(dt: number): void {
+    this.attritionRate =
+      -1 * this.productionRate * (this.troopCount / 100) * (dt / 1000);
   }
 
   private createTooltip(scene: Phaser.Scene): void {
@@ -176,6 +183,8 @@ export default class Node extends Phaser.GameObjects.Arc {
     const newTooltipText = this.parseUpdatedTooltipText();
     const tooltipRows = newTooltipText.split("\n").length;
 
+    this.updateAttritionRate(dt);
+
     this.tooltip.y =
       this.y -
       (2 * Config.PADDING_TEXT +
@@ -183,7 +192,10 @@ export default class Node extends Phaser.GameObjects.Arc {
         tooltipRows * 14); // Offset by 2 * padding + 3 * row spacing + 3 * font height
 
     if (this.owner !== "") {
-      this.troopCount = this.troopCount + this.productionRate * (dt / 1000);
+      this.troopCount =
+        this.troopCount +
+        this.productionRate * (dt / 1000) +
+        this.attritionRate;
     }
 
     if (this.input) {
