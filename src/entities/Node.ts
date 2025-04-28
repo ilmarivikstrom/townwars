@@ -162,8 +162,14 @@ export default class Node extends Phaser.GameObjects.Arc {
       this.troopCount = this.troopCount + this.productionRate * (dt / 1000);
     }
 
-    this.setRadius(Math.sqrt((this.troopCount * 4) / Math.PI) + 15);
-    this.input?.hitArea.setTo(this.width / 2, this.height / 2, this.radius);
+    if (this.input) {
+      const newRadius = Math.sqrt((this.troopCount * 4) / Math.PI) + 15;
+      this.setRadius(newRadius);
+      const hitArea = this.input.hitArea as Phaser.Geom.Circle;
+      hitArea.setTo(this.width / 2, this.height / 2, newRadius);
+    } else {
+      throw new Error("Node `input` is null. Exiting...");
+    }
 
     this.troopCountText.setText(this.troopCount.toFixed(0));
     this.tooltip.setText(newTooltipText);
