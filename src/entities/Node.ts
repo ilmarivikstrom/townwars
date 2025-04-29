@@ -22,7 +22,6 @@ export default class Node extends Phaser.GameObjects.Arc {
     super(scene, x, y, 15);
     scene.add.existing(this);
     this.productionRate = productionRate;
-    this.updateAttritionRate();
     this.setOwnerAndColor(owner);
 
     this.presetTroops();
