@@ -2,6 +2,10 @@ import Phaser from "phaser";
 import { Color, toHexColor } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
 
+type TimeApiResponse = {
+  message: number;
+};
+
 export default class MainMenu extends Phaser.Scene {
   private serverIndicator!: Phaser.GameObjects.Text;
   private startGameButton!: Phaser.GameObjects.Text;
@@ -75,11 +79,11 @@ export default class MainMenu extends Phaser.Scene {
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
 
-    button.on("pointerover", (pointer: Phaser.Input.Pointer) => {
+    button.on("pointerover", () => {
       button.setBackgroundColor(toHexColor(Color.DEFAULT_PLAYER_COLOR));
     });
 
-    button.on("pointerout", (pointer: Phaser.Input.Pointer) => {
+    button.on("pointerout", () => {
       button.setBackgroundColor(toHexColor(Color.TOOLTIP_BACKGROUND));
     });
 
@@ -111,7 +115,7 @@ export default class MainMenu extends Phaser.Scene {
       headers: myHeaders,
     })
       .then((response) => response.json())
-      .then((data) => {
+      .then((data: TimeApiResponse) => {
         console.log("Data received:", data);
         const datetimePretty = new Date(0);
         datetimePretty.setUTCMilliseconds(data.message);
