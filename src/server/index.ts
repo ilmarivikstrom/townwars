@@ -1,4 +1,4 @@
-import express from 'express'
+import express from 'express';
 const app = express();
 const port : number = 5172;
 
@@ -10,7 +10,7 @@ app.get('/api/time', (req, res) => {
 
 app.get('/api/hello', (req, res) => {
   res.json({ message: 'Hello from the backend!' });
-})
+});
 
 app.listen(port, () => {
   console.log(`Backend running on http://localhost:${5172}`);

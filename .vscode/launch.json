@@ -8,10 +8,10 @@
       "type": "node-terminal"
     },
     {
-      "type": "pwa-node",
+      "program": "${workspaceFolder}/src/server/index.ts",
+      "name": "Debug: server",
       "request": "launch",
-      "name": "Debug Backend",
-      "program": "${workspaceFolder}/src/server/index.ts"
+      "type": "node"
     },
     {
       "name": "Debug in Chrome",
