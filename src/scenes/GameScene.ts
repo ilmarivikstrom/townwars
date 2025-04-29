@@ -34,10 +34,10 @@ export default class GameScene extends Phaser.Scene {
       if (pointer.button === 0) {
         if (this.ctrlButtonDown) {
           this.tryCreateNewNode(pointer.x, pointer.y, "");
-          this.createEdges();
+          this.updateEdges();
         } else if (this.shiftButtonDown) {
           this.tryCreateNewNode(pointer.x, pointer.y, this.currentUserId);
-          this.createEdges();
+          this.updateEdges();
         }
       }
     });
@@ -52,7 +52,7 @@ export default class GameScene extends Phaser.Scene {
       this.nodes = this.nodes.filter(
         (candidateNode) => candidateNode !== targetNode
       );
-      this.createEdges();
+      this.updateEdges();
     });
 
     this.events.on("nodeDrag", (node: Node, pointer: Phaser.Input.Pointer) => {
@@ -97,7 +97,7 @@ export default class GameScene extends Phaser.Scene {
           targetNode.setTroops(targetNode.getTroops() + difference);
         }
         this.dragIndicator.destroy();
-        this.createEdges();
+        this.updateEdges();
       }
     );
 
@@ -167,7 +167,7 @@ export default class GameScene extends Phaser.Scene {
     this.edges = [];
   }
 
-  private createEdges(): void {
+  private updateEdges(): void {
     for (const edge of this.edges) {
       edge.destroy();
     }
