@@ -1,60 +1,76 @@
 import Phaser from "phaser";
-import { Color } from "../utils/Color.js";
+import { Color, toHexColor } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
 
 export default class MainMenu extends Phaser.Scene {
-    private graphics!: Phaser.GameObjects.Graphics;
-    private optionItems: { text: Phaser.GameObjects.Text, action: string }[] = [];
-    private options: { text: string, action: string }[] = [
-        { "text": "Start game", "action": "GameScene" },
-        { "text": "Map editor", "action": "EditScene" },
-        { "text": "Quit", "action": "QuitScene" }
-    ];
-    private MARGINS = {
-        STARTING_OFFSET: 0.5,
-        HEIGTH: 100,
-        WIDTH: 200,
-        SPACING: 80
-    };
+  private startGameButton!: Phaser.GameObjects.Text;
+  private mapEditorButton!: Phaser.GameObjects.Text;
+  private quitButton!: Phaser.GameObjects.Text;
 
-    constructor ()
-    {
-        super('MainMenu');
-    }
+  constructor() {
+    super("MainMenu");
+  }
 
-    preload () {}
+  preload() {}
 
-    create ()
-    {
-        this.graphics = this.add.graphics();
-        for (const [index, [text, action]] of Object.entries(this.options).entries()) {
-            const textBox = this.add.text(
-                Math.floor(
-                    Config.WINDOW_WIDTH / 2
-                ),
-                Math.floor(
-                    Config.WINDOW_HEIGHT * this.MARGINS.STARTING_OFFSET
-                    + index * this.MARGINS.SPACING
-                ),
-                text).setOrigin(0.5, 0.5);
-            textBox.setOrigin(0.5, 0.5);
-            textBox.setDepth(Layers.UI
-            );
-            this.optionItems.push({text: textBox, action: action.action});
-        }
+  create() {
+    this.startGameButton = this.createButton("start game", 0);
+    this.startGameButton.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+      if (pointer.button === 0) {
+        console.log("Clicked start game button");
+        this.scene.switch("GameScene");
+      }
+    });
+    this.add.existing(this.startGameButton);
 
-        //this.input.on('menuobjectclick', (pointer, menuObject) => this.clickCoin(menuObject));
+    this.mapEditorButton = this.createButton("map editor", 50);
+    this.mapEditorButton.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+      if (pointer.button === 0) {
+        console.log("Clicked map editor button");
+      }
+    });
+    this.add.existing(this.mapEditorButton);
 
-        this.input.once('pointerdown', function () {
-            for (const [text, action] of Object.entries(this.optionItems)) {
-                console.log(text.getBounds().x);
-                if (text.getBounds()) {
-                    this.scene.start(action);
-                }
-            }
+    this.quitButton = this.createButton("quit", 100);
+    this.quitButton.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+      if (pointer.button === 0) {
+        console.log("Clicked quit button");
+      }
+    });
+    this.add.existing(this.quitButton);
+  }
 
-        }, this);
+  private createButton(text: string, yOffset: number): Phaser.GameObjects.Text {
+    const button = new Phaser.GameObjects.Text(
+      this,
+      Config.WINDOW_WIDTH / 2,
+      Config.WINDOW_HEIGHT / 2 + yOffset,
+      text,
+      {
+        backgroundColor: toHexColor(Color.TOOLTIP_BACKGROUND),
+        color: toHexColor(Color.TEXT_DEFAULT),
+        padding: { x: Config.PADDING_TEXT, y: Config.PADDING_TEXT },
+        fontFamily: "CaskaydiaMono",
+      }
+    );
 
-    }
+    button.setOrigin(0.5, 0.5);
+    button.setDepth(Layers.UI);
 
+    button.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(0, 0, button.width, button.height),
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+    });
+
+    button.on("pointerover", (pointer: Phaser.Input.Pointer) => {
+      button.setBackgroundColor(toHexColor(Color.DEFAULT_PLAYER_COLOR));
+    });
+
+    button.on("pointerout", (pointer: Phaser.Input.Pointer) => {
+      button.setBackgroundColor(toHexColor(Color.TOOLTIP_BACKGROUND));
+    });
+
+    return button;
+  }
 }
