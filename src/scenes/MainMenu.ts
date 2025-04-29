@@ -1,20 +1,20 @@
 import Phaser from "phaser";
 import { Color } from "../utils/Color.js";
-import { Config } from "../utils/Config.js";
+import { Config, Layers } from "../utils/Config.js";
 
 export default class MainMenu extends Phaser.Scene {
     private graphics!: Phaser.GameObjects.Graphics;
-
-    private options: string[] = [
-        "Start game",
-        "Map editor",
-        "Quit"
+    private optionItems: { text: Phaser.GameObjects.Text, action: string }[] = [];
+    private options: { text: string, action: string }[] = [
+        { "text": "Start game", "action": "GameScene" },
+        { "text": "Map editor", "action": "EditScene" },
+        { "text": "Quit", "action": "QuitScene" }
     ];
     private MARGINS = {
         STARTING_OFFSET: 0.5,
-        HEIGTH: 40,
-        WIDTH: 100,
-        SPACING: 30
+        HEIGTH: 100,
+        WIDTH: 200,
+        SPACING: 80
     };
 
     constructor ()
@@ -27,25 +27,31 @@ export default class MainMenu extends Phaser.Scene {
     create ()
     {
         this.graphics = this.add.graphics();
-        for (const [index, option] of this.options.entries()) {
-            this.add.text(
+        for (const [index, [text, action]] of Object.entries(this.options).entries()) {
+            const textBox = this.add.text(
                 Math.floor(
                     Config.WINDOW_WIDTH / 2
-                    - this.MARGINS.WIDTH / 2
                 ),
                 Math.floor(
                     Config.WINDOW_HEIGHT * this.MARGINS.STARTING_OFFSET
                     + index * this.MARGINS.SPACING
                 ),
-                option);
+                text).setOrigin(0.5, 0.5);
+            textBox.setOrigin(0.5, 0.5);
+            textBox.setDepth(Layers.UI
+            );
+            this.optionItems.push({text: textBox, action: action.action});
         }
 
-        this.input.once('pointerdown', function ()
-        {
+        //this.input.on('menuobjectclick', (pointer, menuObject) => this.clickCoin(menuObject));
 
-            console.log('From MainMenu to GameScene');
-
-            this.scene.start('GameScene');
+        this.input.once('pointerdown', function () {
+            for (const [text, action] of Object.entries(this.optionItems)) {
+                console.log(text.getBounds().x);
+                if (text.getBounds()) {
+                    this.scene.start(action);
+                }
+            }
 
         }, this);
 
