@@ -4,6 +4,9 @@ export function toHexColor(color: number): string {
 
 export const Color: Record<string, number> = {
   DEFAULT_PLAYER_COLOR: 0x3d59a1,
+  MENU_BLUE: 0x3d59a1,
+  GRID_MINOR_COLOR: 0x3d59a1,
+  GRID_MAJOR_COLOR: 0xa9b1d6,
   OUTSIDE: 0x1f2335,
   GAME_WINDOW: 0x1a1b26,
   TEXT_DEFAULT: 0xa9b1d6,
@@ -20,4 +23,5 @@ export const Color: Record<string, number> = {
   GOLD: 0xd6bf77,
   PLATINUM: 0x7bd1d8,
   DIAMOND: 0xa588f4,
+  EDGE_DARK: 0x333344,
 };

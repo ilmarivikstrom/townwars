@@ -167,14 +167,12 @@ export default class Node extends Phaser.GameObjects.Arc {
 
   private parseUpdatedTooltipText(): string {
     const tooltipText =
-      "Production: " +
+      "Base production: " +
       this.productionRate.toString() +
       "/s" +
       "\n" +
       "Troops: " +
-      this.troopCount.toFixed(0) +
-      "\nOwner: " +
-      (this.owner === "" ? "None" : this.owner);
+      this.troopCount.toFixed(0);
     return tooltipText;
   }
 

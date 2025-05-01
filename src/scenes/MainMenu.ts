@@ -10,7 +10,9 @@ export default class MainMenu extends Phaser.Scene {
   private serverIndicator!: Phaser.GameObjects.Text;
   private startGameButton!: Phaser.GameObjects.Text;
   private mapEditorButton!: Phaser.GameObjects.Text;
-  private quitButton!: Phaser.GameObjects.Text;
+  private settingsButton!: Phaser.GameObjects.Text;
+  private innerGrid!: Phaser.GameObjects.Grid;
+  private outerGrid!: Phaser.GameObjects.Grid;
 
   constructor() {
     super("MainMenu");
@@ -19,16 +21,38 @@ export default class MainMenu extends Phaser.Scene {
   public preload() {}
 
   public create() {
+    this.innerGrid = new Phaser.GameObjects.Grid(
+      this,
+      Config.WINDOW_WIDTH / 2,
+      Config.WINDOW_HEIGHT / 2,
+      Config.WINDOW_WIDTH,
+      Config.WINDOW_HEIGHT,
+      10,
+      10,
+      0x000000,
+      0.0,
+      Color.GRID_MINOR_COLOR,
+      0.06
+    );
+    this.add.existing(this.innerGrid);
+
+    this.outerGrid = new Phaser.GameObjects.Grid(
+      this,
+      Config.WINDOW_WIDTH / 2,
+      Config.WINDOW_HEIGHT / 2,
+      Config.WINDOW_WIDTH,
+      Config.WINDOW_HEIGHT,
+      80,
+      80,
+      0x000000,
+      0.0,
+      Color.GRID_MAJOR_COLOR,
+      0.06
+    );
+    this.add.existing(this.outerGrid);
+
     this.serverIndicator = this.createServerIndicator();
     this.add.existing(this.serverIndicator);
-
-    this.time.addEvent({
-      delay: 1000,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      callback: this.updateServerIndicator,
-      callbackScope: this,
-      loop: true,
-    });
 
     this.startGameButton = this.createButton("start game", 0);
     this.startGameButton.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
@@ -47,13 +71,22 @@ export default class MainMenu extends Phaser.Scene {
     });
     this.add.existing(this.mapEditorButton);
 
-    this.quitButton = this.createButton("quit", 100);
-    this.quitButton.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+    this.settingsButton = this.createButton("settings", 100);
+    this.settingsButton.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.button === 0) {
-        console.log("Clicked quit button");
+        console.log("Clicked settings button");
+        this.scene.switch("SettingsScene");
       }
     });
-    this.add.existing(this.quitButton);
+    this.add.existing(this.settingsButton);
+
+    this.time.addEvent({
+      delay: 1000,
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      callback: this.updateServerIndicator,
+      callbackScope: this,
+      loop: true,
+    });
   }
 
   private createButton(text: string, yOffset: number): Phaser.GameObjects.Text {
@@ -80,7 +113,7 @@ export default class MainMenu extends Phaser.Scene {
     });
 
     button.on("pointerover", () => {
-      button.setBackgroundColor(toHexColor(Color.DEFAULT_PLAYER_COLOR));
+      button.setBackgroundColor(toHexColor(Color.MENU_BLUE));
     });
 
     button.on("pointerout", () => {
@@ -95,10 +128,10 @@ export default class MainMenu extends Phaser.Scene {
       this,
       Config.PADDING_ELEMENTS,
       Config.PADDING_ELEMENTS,
-      "No server info, yet...",
+      "Offline",
       {
         backgroundColor: toHexColor(Color.TOOLTIP_BACKGROUND),
-        color: toHexColor(Color.TEXT_DEFAULT),
+        color: toHexColor(Color.RED),
         padding: { x: Config.PADDING_TEXT, y: Config.PADDING_TEXT },
         fontFamily: "CaskaydiaMono",
       }
@@ -107,25 +140,32 @@ export default class MainMenu extends Phaser.Scene {
   }
 
   private async updateServerIndicator(): Promise<void> {
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
+    try {
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
 
-    await fetch("/api/time", {
-      method: "GET",
-      headers: myHeaders,
-    })
-      .then((response) => response.json())
-      .then((data: TimeApiResponse) => {
-        console.log("Data received:", data);
-        const datetimePretty = new Date(0);
-        datetimePretty.setUTCMilliseconds(data.message);
-        this.serverIndicator.setText(
-          "Server status: " + datetimePretty.toString()
-        );
-      })
-      .catch((error: unknown) => {
-        console.error("Error fetching data:", error);
+      const response = await fetch("/api/time", {
+        method: "GET",
+        headers: myHeaders,
       });
+
+      if (!response.ok) {
+        throw new Error(
+          "Time API status code is " + response.status.toString()
+        );
+      }
+
+      const data: TimeApiResponse = await response.json();
+      console.log("Data received: ", data);
+      const datetimePretty = new Date(0);
+      datetimePretty.setUTCMilliseconds(data.message);
+      this.serverIndicator.setText("Online: " + datetimePretty.toString());
+      this.serverIndicator.setColor(toHexColor(Color.GREEN));
+    } catch (error: unknown) {
+      console.error("Error fetching data:", error);
+      this.serverIndicator.setText("Offline");
+      this.serverIndicator.setColor(toHexColor(Color.RED));
+    }
   }
 
   public update(): void {}

@@ -5,6 +5,7 @@ import DragIndicator from "../entities/DragIndicator.js";
 import Node from "../entities/Node.js";
 import StatisticsUI from "../ui/StatisticsUI.js";
 import { Color } from "../utils/Color.js";
+import { Config } from "../utils/Config.js";
 import { findNodeAtPoint } from "../utils/Math.js";
 
 export default class GameScene extends Phaser.Scene {
@@ -17,6 +18,8 @@ export default class GameScene extends Phaser.Scene {
   private currentUserId: string = uuid();
   private ctrlButtonDown: boolean = false;
   private shiftButtonDown: boolean = false;
+  private innerGrid!: Phaser.GameObjects.Grid;
+  private outerGrid!: Phaser.GameObjects.Grid;
 
   public constructor() {
     super("GameScene");
@@ -25,6 +28,36 @@ export default class GameScene extends Phaser.Scene {
   public preload(): void {}
 
   public create(): void {
+    this.innerGrid = new Phaser.GameObjects.Grid(
+      this,
+      Config.WINDOW_WIDTH / 2,
+      Config.WINDOW_HEIGHT / 2,
+      Config.WINDOW_WIDTH,
+      Config.WINDOW_HEIGHT,
+      10,
+      10,
+      0x000000,
+      0.0,
+      Color.GRID_MINOR_COLOR,
+      0.06
+    );
+    this.add.existing(this.innerGrid);
+
+    this.outerGrid = new Phaser.GameObjects.Grid(
+      this,
+      Config.WINDOW_WIDTH / 2,
+      Config.WINDOW_HEIGHT / 2,
+      Config.WINDOW_WIDTH,
+      Config.WINDOW_HEIGHT,
+      80,
+      80,
+      0x000000,
+      0.0,
+      Color.GRID_MAJOR_COLOR,
+      0.06
+    );
+    this.add.existing(this.outerGrid);
+
     this.dragIndicator = new DragIndicator(this, 0, 0, 0, 0);
 
     this.debugUI = new DebugUI(this);
@@ -129,6 +162,10 @@ export default class GameScene extends Phaser.Scene {
     this.input.keyboard?.on("keyup-SHIFT", () => {
       this.shiftButtonDown = false;
     });
+
+    this.input.keyboard?.on("keydown-ESC", () => {
+      this.scene.switch("MainMenu");
+    });
   }
 
   private selectOnly(nodeToSelect: Node): void {
@@ -180,7 +217,7 @@ export default class GameScene extends Phaser.Scene {
         const edgeColor =
           node.owner !== "" && targetNode.owner !== ""
             ? Color.DEFAULT_PLAYER_COLOR
-            : Color.OUTSIDE;
+            : Color.EDGE_DARK;
         const edge = new Phaser.GameObjects.Line(
           this,
           0,
