@@ -2,8 +2,7 @@ import Phaser from "phaser";
 import { Color, PlayerColor, toHexColor } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
 import Grid from "../ui/Grid.js";
-import { io } from 'socket.io-client';
-//import { Socket } from "socket.io";
+import { io, Socket } from "socket.io-client";
 
 type TimeApiResponse = {
   message: number;
@@ -17,7 +16,7 @@ export default class MainMenu extends Phaser.Scene {
   private grid!: Grid;
   private innerGrid!: Phaser.GameObjects.Grid;
   private outerGrid!: Phaser.GameObjects.Grid;
-  private sock!;
+  private sock!: Socket;
 
   constructor() {
     super("MainMenu");
@@ -67,21 +66,20 @@ export default class MainMenu extends Phaser.Scene {
     });
 
     this.sock = io("ws://localhost:5173/", {
-      path: "/townwars/"
+      path: "/townwars/",
     });
-    console.log('Socket established:', this.sock);
+    console.log("Socket established:", this.sock);
 
-    this.sock.on('connect', () => {
-      console.log('Connected to server with ID:', this.sock.id);
+    this.sock.on("connect", () => {
+      console.log("Connected to server with ID:", this.sock.id);
     });
 
-    this.sock.on('hello', (msg) => {
-      console.log('Server says:', msg);
+    this.sock.on("hello", (msg) => {
+      console.log("Server says:", msg);
     });
 
     // Send a message to the server
-    this.sock.emit('client-message', 'Hi from modern client!');
-
+    this.sock.emit("client-message", "Hi from modern client!");
   }
 
   private createButton(text: string, yOffset: number): Phaser.GameObjects.Text {
@@ -135,8 +133,8 @@ export default class MainMenu extends Phaser.Scene {
   }
 
   private async wsGetTime(): Promise<void> {
-    this.sock.emit('client', 'Time please');
-    this.sock.on('response', (msg : string) => {
+    this.sock.emit("client", "Time please");
+    this.sock.on("response", (msg: string) => {
       console.log(msg);
     });
   }
