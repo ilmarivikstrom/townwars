@@ -7,7 +7,6 @@ export default class StrengthUI {
   private twoQuartersText!: Phaser.GameObjects.Text;
   private threeQuartersText!: Phaser.GameObjects.Text;
   private fourQuartersText!: Phaser.GameObjects.Text;
-  // private strength!: number;
 
   constructor(scene: Phaser.Scene, strength: number) {
     this.oneQuarterText = scene.add.text(
