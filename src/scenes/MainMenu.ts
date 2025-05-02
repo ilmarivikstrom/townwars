@@ -1,12 +1,9 @@
 import Phaser from "phaser";
 import { Color, PlayerColor, toHexColor } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
-<<<<<<< Updated upstream
 import Grid from "../ui/Grid.js";
-=======
 import { io } from 'socket.io-client';
 //import { Socket } from "socket.io";
->>>>>>> Stashed changes
 
 type TimeApiResponse = {
   message: number;
@@ -17,13 +14,10 @@ export default class MainMenu extends Phaser.Scene {
   private startGameButton!: Phaser.GameObjects.Text;
   private mapEditorButton!: Phaser.GameObjects.Text;
   private settingsButton!: Phaser.GameObjects.Text;
-<<<<<<< Updated upstream
   private grid!: Grid;
-=======
   private innerGrid!: Phaser.GameObjects.Grid;
   private outerGrid!: Phaser.GameObjects.Grid;
   private sock!;
->>>>>>> Stashed changes
 
   constructor() {
     super("MainMenu");
