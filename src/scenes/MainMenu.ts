@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { Color, PlayerColor, toHexColor } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
+import Grid from "../ui/Grid.js";
 
 type TimeApiResponse = {
   message: number;
@@ -11,8 +12,7 @@ export default class MainMenu extends Phaser.Scene {
   private startGameButton!: Phaser.GameObjects.Text;
   private mapEditorButton!: Phaser.GameObjects.Text;
   private settingsButton!: Phaser.GameObjects.Text;
-  private innerGrid!: Phaser.GameObjects.Grid;
-  private outerGrid!: Phaser.GameObjects.Grid;
+  private grid!: Grid;
 
   constructor() {
     super("MainMenu");
@@ -21,35 +21,7 @@ export default class MainMenu extends Phaser.Scene {
   public preload() {}
 
   public create() {
-    this.innerGrid = new Phaser.GameObjects.Grid(
-      this,
-      Config.WINDOW_WIDTH / 2,
-      Config.WINDOW_HEIGHT / 2,
-      Config.WINDOW_WIDTH,
-      Config.WINDOW_HEIGHT,
-      10,
-      10,
-      0x000000,
-      0.0,
-      Color.GRID_MINOR_COLOR,
-      0.06
-    );
-    this.add.existing(this.innerGrid);
-
-    this.outerGrid = new Phaser.GameObjects.Grid(
-      this,
-      Config.WINDOW_WIDTH / 2,
-      Config.WINDOW_HEIGHT / 2,
-      Config.WINDOW_WIDTH,
-      Config.WINDOW_HEIGHT,
-      80,
-      80,
-      0x000000,
-      0.0,
-      Color.GRID_MAJOR_COLOR,
-      0.06
-    );
-    this.add.existing(this.outerGrid);
+    this.grid = new Grid(this);
 
     this.serverIndicator = this.createServerIndicator();
     this.add.existing(this.serverIndicator);

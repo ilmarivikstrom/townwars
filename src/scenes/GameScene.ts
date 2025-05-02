@@ -8,6 +8,7 @@ import { Color } from "../utils/Color.js";
 import { Config } from "../utils/Config.js";
 import { findNodeAtPoint } from "../utils/Math.js";
 import SettingsManager from "../utils/SettingsManager.js";
+import Grid from "../ui/Grid.js";
 
 export default class GameScene extends Phaser.Scene {
   private nodes: Node[] = [];
@@ -19,8 +20,7 @@ export default class GameScene extends Phaser.Scene {
   private currentUserId: string = uuid();
   private ctrlButtonDown: boolean = false;
   private shiftButtonDown: boolean = false;
-  private innerGrid!: Phaser.GameObjects.Grid;
-  private outerGrid!: Phaser.GameObjects.Grid;
+  private grid!: Grid;
 
   public constructor() {
     super("GameScene");
@@ -29,35 +29,7 @@ export default class GameScene extends Phaser.Scene {
   public preload(): void {}
 
   public create(): void {
-    this.innerGrid = new Phaser.GameObjects.Grid(
-      this,
-      Config.WINDOW_WIDTH / 2,
-      Config.WINDOW_HEIGHT / 2,
-      Config.WINDOW_WIDTH,
-      Config.WINDOW_HEIGHT,
-      10,
-      10,
-      0x000000,
-      0.0,
-      Color.GRID_MINOR_COLOR,
-      0.06
-    );
-    this.add.existing(this.innerGrid);
-
-    this.outerGrid = new Phaser.GameObjects.Grid(
-      this,
-      Config.WINDOW_WIDTH / 2,
-      Config.WINDOW_HEIGHT / 2,
-      Config.WINDOW_WIDTH,
-      Config.WINDOW_HEIGHT,
-      80,
-      80,
-      0x000000,
-      0.0,
-      Color.GRID_MAJOR_COLOR,
-      0.06
-    );
-    this.add.existing(this.outerGrid);
+    this.grid = new Grid(this);
 
     this.dragIndicator = new DragIndicator(this, 0, 0, 0, 0);
 

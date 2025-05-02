@@ -7,17 +7,17 @@ import {
 } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
 import SettingsManager from "../utils/SettingsManager.js";
+import Grid from "../ui/Grid.js";
 
 export default class SettingsScene extends Phaser.Scene {
   private playerColorIndicator!: Phaser.GameObjects.Text;
   private colorButtons: Phaser.GameObjects.Text[] = [];
-  private minorGrid!: Phaser.GameObjects.Grid;
-  private majorGrid!: Phaser.GameObjects.Grid;
   private colorOptions: PlayerColorValue[] = [
     PlayerColor.DEFAULT,
     PlayerColor.RED,
     PlayerColor.ORANGE,
   ];
+  private grid!: Grid;
 
   constructor() {
     super("SettingsScene");
@@ -26,36 +26,7 @@ export default class SettingsScene extends Phaser.Scene {
   public preload() {}
 
   public create() {
-    this.minorGrid = new Phaser.GameObjects.Grid(
-      this,
-      Config.WINDOW_WIDTH / 2,
-      Config.WINDOW_HEIGHT / 2,
-      Config.WINDOW_WIDTH,
-      Config.WINDOW_HEIGHT,
-      10,
-      10,
-      0x000000,
-      0.0,
-      Color.GRID_MINOR_COLOR,
-      0.06
-    );
-    this.add.existing(this.minorGrid);
-
-    this.majorGrid = new Phaser.GameObjects.Grid(
-      this,
-      Config.WINDOW_WIDTH / 2,
-      Config.WINDOW_HEIGHT / 2,
-      Config.WINDOW_WIDTH,
-      Config.WINDOW_HEIGHT,
-      80,
-      80,
-      0x000000,
-      0.0,
-      Color.GRID_MAJOR_COLOR,
-      0.06
-    );
-    this.add.existing(this.majorGrid);
-
+    this.grid = new Grid(this);
     this.playerColorIndicator = this.createPlayerColorIndicator("player color");
     this.add.existing(this.playerColorIndicator);
 

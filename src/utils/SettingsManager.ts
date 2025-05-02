@@ -14,6 +14,7 @@ class SettingsManager {
 
   private constructor() {
     this.settings = this.loadSettings();
+    this.saveSettings();
   }
 
   public static get instance(): SettingsManager {
