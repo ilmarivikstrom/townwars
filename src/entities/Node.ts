@@ -1,11 +1,16 @@
 import Phaser from "phaser";
 import { Color, toHexColor } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
+import { integerToRoman } from "../utils/Math.js";
 import SettingsManager from "../utils/SettingsManager.js";
+
+const BASE_RADIUS = 32;
 
 export default class Node extends Phaser.GameObjects.Arc {
   private tooltip!: Phaser.GameObjects.Text;
-  private productionRate!: number;
+  private baseProductionRate!: number;
+  private baseProductionRateRoman!: string;
+  private productionRateIndicator!: Phaser.GameObjects.Text;
   private troopCount!: number;
   private troopCountText!: Phaser.GameObjects.Text;
   private pointLight!: Phaser.GameObjects.PointLight;
@@ -20,40 +25,34 @@ export default class Node extends Phaser.GameObjects.Arc {
     productionRate: number,
     owner: string = ""
   ) {
-    super(scene, x, y, 15);
+    super(scene, x, y, BASE_RADIUS);
     scene.add.existing(this);
-    this.productionRate = productionRate;
+
     this.setOwnerAndColor(owner);
-
     this.presetTroops();
-    this.setRadius(Math.sqrt((this.troopCount * 4) / Math.PI) + 15);
+    this.setRadius(Math.sqrt((this.troopCount * 4) / Math.PI) + BASE_RADIUS);
 
-    const strokeWidth = 5;
-    const strokeAlpha = this.owner == "" ? 0.5 : 1.0;
+    this.baseProductionRate = productionRate;
+    this.baseProductionRateRoman = integerToRoman(this.baseProductionRate);
 
-    switch (this.productionRate) {
-      case 1:
-        this.setStrokeStyle(strokeWidth, Color.BRONZE, strokeAlpha);
-        break;
-      case 2:
-        this.setStrokeStyle(strokeWidth, Color.SILVER, strokeAlpha);
-        break;
-      case 3:
-        this.setStrokeStyle(strokeWidth, Color.GOLD, strokeAlpha);
-        break;
-      case 4:
-        this.setStrokeStyle(strokeWidth, Color.PLATINUM, strokeAlpha);
-        break;
-      case 5:
-        this.setStrokeStyle(strokeWidth, Color.DIAMOND, strokeAlpha);
-        break;
-      default:
-        console.log(
-          "Color not mapped for production rate " +
-            this.productionRate.toString()
-        );
-        this.setStrokeStyle(strokeWidth, Color.OUTSIDE, strokeAlpha);
-    }
+    const strokeWidth = 3;
+
+    this.setStrokeStyle(strokeWidth, Color.OUTSIDE, 1.0);
+
+    this.productionRateIndicator = new Phaser.GameObjects.Text(
+      scene,
+      this.x,
+      this.y + this.radius / 3,
+      this.baseProductionRateRoman,
+      {
+        color: toHexColor(Color.TEXT_DEFAULT),
+        fontSize: 14,
+        fontFamily: "CaskaydiaMono",
+      }
+    );
+    this.productionRateIndicator.setOrigin(0.5, 0.5);
+    this.productionRateIndicator.setDepth(Layers.UI);
+    scene.add.existing(this.productionRateIndicator);
 
     this.setDepth(Layers.NODE_BASE);
     this.setInteractive({
@@ -102,7 +101,7 @@ export default class Node extends Phaser.GameObjects.Arc {
 
   private updateAttritionRate(dt: number): void {
     this.attritionRate =
-      -1 * this.productionRate * (this.troopCount / 100) * (dt / 1000);
+      -1 * this.baseProductionRate * (this.troopCount / 100) * (dt / 1000);
   }
 
   private createTooltip(scene: Phaser.Scene): void {
@@ -133,8 +132,13 @@ export default class Node extends Phaser.GameObjects.Arc {
   private createTroopCountText(scene: Phaser.Scene): void {
     this.troopCountText = scene.add.text(
       this.x,
-      this.y,
-      this.troopCount.toString()
+      this.y - this.radius / 4,
+      this.troopCount.toString(),
+      {
+        color: toHexColor(Color.TEXT_DEFAULT),
+        fontSize: 20,
+        fontStyle: "bold",
+      }
     );
     this.troopCountText.setOrigin(0.5, 0.5);
     this.troopCountText.setDepth(Layers.NODE_CONTENT);
@@ -161,7 +165,7 @@ export default class Node extends Phaser.GameObjects.Arc {
     if (this.owner !== "") {
       this.setFillStyle(SettingsManager.get("playerColor"));
     } else {
-      this.setFillStyle(Color.GAME_WINDOW);
+      this.setFillStyle(Color.NODE_DEFAULT);
     }
   }
 
@@ -173,7 +177,7 @@ export default class Node extends Phaser.GameObjects.Arc {
   private parseUpdatedTooltipText(): string {
     const tooltipText =
       "Base production: " +
-      this.productionRate.toString() +
+      this.baseProductionRate.toString() +
       "/s" +
       "\n" +
       "Troops: " +
@@ -196,12 +200,13 @@ export default class Node extends Phaser.GameObjects.Arc {
     if (this.owner !== "") {
       this.troopCount =
         this.troopCount +
-        this.productionRate * (dt / 1000) +
+        this.baseProductionRate * (dt / 1000) +
         this.attritionRate;
     }
 
     if (this.input) {
-      const newRadius = Math.sqrt((this.troopCount * 4) / Math.PI) + 15;
+      const newRadius =
+        Math.sqrt((this.troopCount * 4) / Math.PI) + BASE_RADIUS;
       this.setRadius(newRadius);
       const hitArea = this.input.hitArea as Phaser.Geom.Circle;
       hitArea.setTo(this.width / 2, this.height / 2, newRadius);
@@ -234,12 +239,13 @@ export default class Node extends Phaser.GameObjects.Arc {
   }
 
   public getProductionRate(): number {
-    return this.productionRate;
+    return this.baseProductionRate;
   }
 
   public destroyChildren(): void {
     this.tooltip.destroy();
     this.troopCountText.destroy();
     this.pointLight.destroy();
+    this.productionRateIndicator.destroy();
   }
 }

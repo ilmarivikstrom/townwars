@@ -11,7 +11,7 @@ export const Color: Record<string, number> = {
   TEXT_DEFAULT: 0xa9b1d6,
   TOOLTIP_BACKGROUND: 0x15161f,
   GRAY_LIGHT: 0x999999,
-  NODE_DEFAULT: 0x444444,
+  NODE_DEFAULT: 0x333333,
   GREEN: 0x9ece6a,
   PURPLE: 0xbb9af7,
   RED: 0xf7768e,
@@ -22,6 +22,7 @@ export const Color: Record<string, number> = {
   PLATINUM: 0x7bd1d8,
   DIAMOND: 0xa588f4,
   EDGE_DARK: 0x333344,
+  BLACK: 0x000000,
 };
 
 export const PlayerColor = {

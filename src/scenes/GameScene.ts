@@ -8,18 +8,22 @@ import { Color } from "../utils/Color.js";
 import { findNodeAtPoint } from "../utils/Math.js";
 import SettingsManager from "../utils/SettingsManager.js";
 import Grid from "../ui/Grid.js";
+import StrengthUI from "../ui/StrengthUI.js";
+
+const DRAG_STRENGTHS = [0.25, 0.5, 0.75, 1.0];
 
 export default class GameScene extends Phaser.Scene {
   private nodes: Node[] = [];
   private edges: Phaser.GameObjects.Line[] = [];
   private dragIndicator!: DragIndicator;
-  private pointerCoords: Phaser.Geom.Point = new Phaser.Geom.Point(-1, -1);
   private debugUI!: DebugUI;
+  private dragUI!: StrengthUI;
   private statisticsUI!: StatisticsUI;
   private currentUserId: string = uuid();
   private ctrlButtonDown: boolean = false;
   private shiftButtonDown: boolean = false;
   private grid!: Grid;
+  private currentStrength = DRAG_STRENGTHS[1];
 
   public constructor() {
     super("GameScene");
@@ -34,6 +38,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.debugUI = new DebugUI(this);
     this.statisticsUI = new StatisticsUI(this);
+    this.dragUI = new StrengthUI(this, this.currentStrength);
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.button === 0) {
@@ -84,7 +89,7 @@ export default class GameScene extends Phaser.Scene {
           return;
         }
         const currentTroops = dragNode.getTroops();
-        const newTroopCount = currentTroops * 0.5;
+        const newTroopCount = currentTroops * (1.0 - this.currentStrength);
         const difference = currentTroops - newTroopCount;
 
         // Attack a non-friendly node
@@ -114,11 +119,6 @@ export default class GameScene extends Phaser.Scene {
       this.updateEdges();
     });
 
-    this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
-      this.pointerCoords.x = pointer.x;
-      this.pointerCoords.y = pointer.y;
-    });
-
     this.input.keyboard?.on("keydown-C", () => {
       this.deleteNodes();
     });
@@ -146,6 +146,26 @@ export default class GameScene extends Phaser.Scene {
     this.input.keyboard?.on("keydown-ESC", () => {
       this.scene.switch("MainMenu");
     });
+
+    this.input.keyboard?.on("keydown-ONE", () => {
+      this.dragUI.updateStrengthIndicator(DRAG_STRENGTHS[0]);
+      this.currentStrength = DRAG_STRENGTHS[0];
+    });
+
+    this.input.keyboard?.on("keydown-TWO", () => {
+      this.dragUI.updateStrengthIndicator(DRAG_STRENGTHS[1]);
+      this.currentStrength = DRAG_STRENGTHS[1];
+    });
+
+    this.input.keyboard?.on("keydown-THREE", () => {
+      this.dragUI.updateStrengthIndicator(DRAG_STRENGTHS[2]);
+      this.currentStrength = DRAG_STRENGTHS[2];
+    });
+
+    this.input.keyboard?.on("keydown-FOUR", () => {
+      this.dragUI.updateStrengthIndicator(DRAG_STRENGTHS[3]);
+      this.currentStrength = DRAG_STRENGTHS[3];
+    });
   }
 
   private selectOnly(nodeToSelect: Node): void {
@@ -160,7 +180,7 @@ export default class GameScene extends Phaser.Scene {
 
   private tryCreateNewNode(x: number, y: number, owner: string): void {
     const productionRate = Math.floor(Math.random() * 5) + 1;
-    const testCircle = new Phaser.Geom.Circle(x, y, 50); // Try placing with default margin.
+    const testCircle = new Phaser.Geom.Circle(x, y, 100); // Try placing with default margin.
     for (const node of this.nodes) {
       if (
         Phaser.Geom.Intersects.CircleToRectangle(testCircle, node.getBounds())
@@ -267,7 +287,6 @@ export default class GameScene extends Phaser.Scene {
     this.debugUI.update(
       timestep,
       dt,
-      this.pointerCoords,
       this.nodes.length,
       this.edges.length,
       this.currentUserId

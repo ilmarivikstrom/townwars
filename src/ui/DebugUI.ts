@@ -26,7 +26,6 @@ export default class DebugUI {
   public update(
     timestep: number,
     dt: number,
-    pointerCoords: Phaser.Geom.Point,
     numNodes: integer,
     numEdges: integer,
     userId: string
@@ -38,11 +37,6 @@ export default class DebugUI {
         "dt: " +
         dt.toFixed(2) +
         "ms\n" +
-        "mouse: (" +
-        pointerCoords.x.toFixed(0) +
-        ", " +
-        pointerCoords.y.toFixed(0) +
-        ")\n" +
         "nodes: " +
         numNodes.toString() +
         "\n" +
