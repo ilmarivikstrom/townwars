@@ -144,11 +144,11 @@ export default class GameScene extends Phaser.Scene {
     });
 
     this.input.keyboard?.on("keydown-A", () => {
-      this.shiftButtonDown = true;
+      this.ctrlButtonDown = true;
     });
 
     this.input.keyboard?.on("keyup-A", () => {
-      this.shiftButtonDown = false;
+      this.ctrlButtonDown = false;
     });
 
     this.input.keyboard?.on("keydown-ESC", () => {
