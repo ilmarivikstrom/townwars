@@ -1,7 +1,12 @@
 import Phaser from "phaser";
 import { Color, PlayerColor, toHexColor } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
+<<<<<<< Updated upstream
 import Grid from "../ui/Grid.js";
+=======
+import { io } from 'socket.io-client';
+//import { Socket } from "socket.io";
+>>>>>>> Stashed changes
 
 type TimeApiResponse = {
   message: number;
@@ -12,7 +17,13 @@ export default class MainMenu extends Phaser.Scene {
   private startGameButton!: Phaser.GameObjects.Text;
   private mapEditorButton!: Phaser.GameObjects.Text;
   private settingsButton!: Phaser.GameObjects.Text;
+<<<<<<< Updated upstream
   private grid!: Grid;
+=======
+  private innerGrid!: Phaser.GameObjects.Grid;
+  private outerGrid!: Phaser.GameObjects.Grid;
+  private sock!;
+>>>>>>> Stashed changes
 
   constructor() {
     super("MainMenu");
@@ -55,10 +66,28 @@ export default class MainMenu extends Phaser.Scene {
     this.time.addEvent({
       delay: 1000,
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      callback: this.updateServerIndicator,
+      // callback: this.updateServerIndicator,
+      callback: this.wsGetTime,
       callbackScope: this,
       loop: true,
     });
+
+    this.sock = io("ws://localhost:5173/", {
+      path: "/townwars/"
+    });
+    console.log('Socket established:', this.sock);
+
+    this.sock.on('connect', () => {
+      console.log('Connected to server with ID:', this.sock.id);
+    });
+
+    this.sock.on('hello', (msg) => {
+      console.log('Server says:', msg);
+    });
+
+    // Send a message to the server
+    this.sock.emit('client-message', 'Hi from modern client!');
+
   }
 
   private createButton(text: string, yOffset: number): Phaser.GameObjects.Text {
@@ -109,6 +138,13 @@ export default class MainMenu extends Phaser.Scene {
       }
     );
     return serverIndicator;
+  }
+
+  private async wsGetTime(): Promise<void> {
+    this.sock.emit('client', 'Time please');
+    this.sock.on('response', (msg : string) => {
+      console.log(msg);
+    });
   }
 
   private async updateServerIndicator(): Promise<void> {
