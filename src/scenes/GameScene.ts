@@ -5,7 +5,6 @@ import DragIndicator from "../entities/DragIndicator.js";
 import Node from "../entities/Node.js";
 import StatisticsUI from "../ui/StatisticsUI.js";
 import { Color } from "../utils/Color.js";
-import { Config } from "../utils/Config.js";
 import { findNodeAtPoint } from "../utils/Math.js";
 import SettingsManager from "../utils/SettingsManager.js";
 import Grid from "../ui/Grid.js";

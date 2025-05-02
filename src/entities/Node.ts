@@ -1,10 +1,5 @@
 import Phaser from "phaser";
-import {
-  Color,
-  PlayerColor,
-  PlayerColorValue,
-  toHexColor,
-} from "../utils/Color.js";
+import { Color, toHexColor } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
 import SettingsManager from "../utils/SettingsManager.js";
 

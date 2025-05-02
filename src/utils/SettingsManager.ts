@@ -8,6 +8,10 @@ const DEFAULT_SETTINGS: GameSettings = {
   playerColor: PlayerColor.DEFAULT,
 };
 
+function isPlayerColorValue(value: unknown): value is PlayerColorValue {
+  return Object.values(PlayerColor).includes(value as PlayerColorValue);
+}
+
 class SettingsManager {
   private static _instance: SettingsManager;
   private settings: GameSettings;
@@ -35,12 +39,16 @@ class SettingsManager {
     }
   }
 
-  private validateSettings(data: any): GameSettings {
+  private validateSettings(data: unknown): GameSettings {
     const validated: GameSettings = { ...DEFAULT_SETTINGS };
 
-    if (Object.values(PlayerColor).includes(data.playerColor)) {
-      validated.playerColor = data.playerColor;
+    if (typeof data === "object" && data !== null && "playerColor" in data) {
+      const maybeColor = (data as Record<string, unknown>).playerColor;
+      if (isPlayerColorValue(maybeColor)) {
+        validated.playerColor = maybeColor;
+      }
     }
+
     return validated;
   }
 
