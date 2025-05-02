@@ -1,16 +1,22 @@
 import Phaser from "phaser";
-import { Color, toHexColor } from "../utils/Color.js";
+import {
+  Color,
+  PlayerColor,
+  PlayerColorValue,
+  toHexColor,
+} from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
+import SettingsManager from "../utils/SettingsManager.js";
 
 export default class SettingsScene extends Phaser.Scene {
   private playerColorIndicator!: Phaser.GameObjects.Text;
   private colorButtons: Phaser.GameObjects.Text[] = [];
   private minorGrid!: Phaser.GameObjects.Grid;
   private majorGrid!: Phaser.GameObjects.Grid;
-  private colorOptions: number[] = [
-    Color.DEFAULT_PLAYER_COLOR,
-    Color.RED,
-    Color.ORANGE,
+  private colorOptions: PlayerColorValue[] = [
+    PlayerColor.DEFAULT,
+    PlayerColor.RED,
+    PlayerColor.ORANGE,
   ];
 
   constructor() {
@@ -53,12 +59,19 @@ export default class SettingsScene extends Phaser.Scene {
     this.playerColorIndicator = this.createPlayerColorIndicator("player color");
     this.add.existing(this.playerColorIndicator);
 
+    const playerColor = SettingsManager.get("playerColor");
+
     for (const [index, color] of this.colorOptions.entries()) {
       const colorButton = this.createColorOptionButton(
         color,
-        Config.WINDOW_WIDTH / 2 + index * 50 + 150,
+        Config.WINDOW_WIDTH / 2 + index * 50 + 100,
         Config.WINDOW_HEIGHT / 2
       );
+      if (color == playerColor) {
+        colorButton.setAlpha(1.0);
+      } else {
+        colorButton.setAlpha(0.4);
+      }
       this.add.existing(colorButton);
       this.colorButtons.push(colorButton);
     }
@@ -69,16 +82,13 @@ export default class SettingsScene extends Phaser.Scene {
 
     this.events.on(
       "colorSelected",
-      (colorOptionButton: Phaser.GameObjects.Text, color: string) => {
+      (colorOptionButton: Phaser.GameObjects.Text, color: PlayerColorValue) => {
         for (const colorButton of this.colorButtons) {
           colorButton.setAlpha(0.4);
         }
-        console.log("color: " + color);
         colorOptionButton.setAlpha(1.0);
-        this.playerColorIndicator.setColor(color);
-        localStorage.setItem("playerColor", color.toString());
-        Color.DEFAULT_PLAYER_COLOR =
-          Phaser.Display.Color.HexStringToColor(color).color;
+        SettingsManager.set("playerColor", color);
+        this.game.events.emit("playerColorChanged");
       }
     );
   }
@@ -132,7 +142,7 @@ export default class SettingsScene extends Phaser.Scene {
     });
 
     colorOptionButton.on("pointerdown", () => {
-      this.events.emit("colorSelected", colorOptionButton, toHexColor(color));
+      this.events.emit("colorSelected", colorOptionButton, color);
     });
     return colorOptionButton;
   }

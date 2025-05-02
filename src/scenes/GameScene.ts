@@ -7,6 +7,7 @@ import StatisticsUI from "../ui/StatisticsUI.js";
 import { Color } from "../utils/Color.js";
 import { Config } from "../utils/Config.js";
 import { findNodeAtPoint } from "../utils/Math.js";
+import SettingsManager from "../utils/SettingsManager.js";
 
 export default class GameScene extends Phaser.Scene {
   private nodes: Node[] = [];
@@ -134,6 +135,14 @@ export default class GameScene extends Phaser.Scene {
       }
     );
 
+    this.game.events.on("playerColorChanged", () => {
+      for (const node of this.nodes) {
+        node.setOwnerAndColor(node.owner);
+        node.setPointLightColor();
+      }
+      this.updateEdges();
+    });
+
     this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
       this.pointerCoords.x = pointer.x;
       this.pointerCoords.y = pointer.y;
@@ -216,7 +225,7 @@ export default class GameScene extends Phaser.Scene {
       for (const targetNode of closestNodes) {
         const edgeColor =
           node.owner !== "" && targetNode.owner !== ""
-            ? Color.DEFAULT_PLAYER_COLOR
+            ? SettingsManager.get("playerColor")
             : Color.EDGE_DARK;
         const edge = new Phaser.GameObjects.Line(
           this,

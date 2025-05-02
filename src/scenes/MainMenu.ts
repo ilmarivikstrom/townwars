@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { Color, toHexColor } from "../utils/Color.js";
+import { Color, PlayerColor, toHexColor } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
 
 type TimeApiResponse = {
@@ -131,7 +131,7 @@ export default class MainMenu extends Phaser.Scene {
       "Offline",
       {
         backgroundColor: toHexColor(Color.TOOLTIP_BACKGROUND),
-        color: toHexColor(Color.RED),
+        color: toHexColor(PlayerColor.RED),
         padding: { x: Config.PADDING_TEXT, y: Config.PADDING_TEXT },
         fontFamily: "CaskaydiaMono",
       }
@@ -164,7 +164,7 @@ export default class MainMenu extends Phaser.Scene {
     } catch (error: unknown) {
       console.error("Error fetching data:", error);
       this.serverIndicator.setText("Offline");
-      this.serverIndicator.setColor(toHexColor(Color.RED));
+      this.serverIndicator.setColor(toHexColor(PlayerColor.RED));
     }
   }
 

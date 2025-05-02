@@ -3,7 +3,6 @@ export function toHexColor(color: number): string {
 }
 
 export const Color: Record<string, number> = {
-  DEFAULT_PLAYER_COLOR: 0x3d59a1,
   MENU_BLUE: 0x3d59a1,
   GRID_MINOR_COLOR: 0x3d59a1,
   GRID_MAJOR_COLOR: 0xa9b1d6,
@@ -14,7 +13,6 @@ export const Color: Record<string, number> = {
   GRAY_LIGHT: 0x999999,
   NODE_DEFAULT: 0x444444,
   GREEN: 0x9ece6a,
-  ORANGE: 0xff9e64,
   PURPLE: 0xbb9af7,
   RED: 0xf7768e,
   YELLOW: 0xe0af68,
@@ -25,3 +23,11 @@ export const Color: Record<string, number> = {
   DIAMOND: 0xa588f4,
   EDGE_DARK: 0x333344,
 };
+
+export const PlayerColor = {
+  DEFAULT: 0x3d59a1,
+  ORANGE: 0xff9e64,
+  RED: 0xf7768e,
+} as const;
+
+export type PlayerColorValue = (typeof PlayerColor)[keyof typeof PlayerColor];

@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { Layers } from "../utils/Config.js";
-import { Color } from "../utils/Color.js";
+import SettingsManager from "../utils/SettingsManager.js";
 
 export default class DragIndicator extends Phaser.GameObjects.Line {
   public line!: Phaser.GameObjects.Line;
@@ -20,9 +20,9 @@ export default class DragIndicator extends Phaser.GameObjects.Line {
       y0,
       x1,
       y1,
-      Phaser.Display.Color.IntegerToColor(Color.DEFAULT_PLAYER_COLOR).brighten(
-        40
-      ).color,
+      Phaser.Display.Color.IntegerToColor(
+        SettingsManager.get("playerColor")
+      ).brighten(40).color,
       1.0
     );
     this.setLineWidth(4, 4);

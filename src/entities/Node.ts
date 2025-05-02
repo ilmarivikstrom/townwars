@@ -1,6 +1,12 @@
 import Phaser from "phaser";
-import { Color, toHexColor } from "../utils/Color.js";
+import {
+  Color,
+  PlayerColor,
+  PlayerColorValue,
+  toHexColor,
+} from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
+import SettingsManager from "../utils/SettingsManager.js";
 
 export default class Node extends Phaser.GameObjects.Arc {
   private tooltip!: Phaser.GameObjects.Text;
@@ -143,7 +149,7 @@ export default class Node extends Phaser.GameObjects.Arc {
     this.pointLight = scene.add.pointlight(
       this.x,
       this.y,
-      Color.DEFAULT_PLAYER_COLOR,
+      SettingsManager.get("playerColor"),
       this.radius * 5,
       0.2,
       0.05
@@ -158,11 +164,15 @@ export default class Node extends Phaser.GameObjects.Arc {
   public setOwnerAndColor(newOwner: string): void {
     this.owner = newOwner;
     if (this.owner !== "") {
-      this.setFillStyle(Color.DEFAULT_PLAYER_COLOR);
-      console.log("Setting fill color to player color");
+      this.setFillStyle(SettingsManager.get("playerColor"));
     } else {
       this.setFillStyle(Color.GAME_WINDOW);
     }
+  }
+
+  public setPointLightColor() {
+    const playerColor = SettingsManager.get("playerColor");
+    this.pointLight.color = Phaser.Display.Color.IntegerToColor(playerColor);
   }
 
   private parseUpdatedTooltipText(): string {
