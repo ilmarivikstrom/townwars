@@ -1,0 +1,23 @@
+{
+  "name": "townwars-server",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "nodemon",
+    "build": "tsc",
+    "debug": "node --inspect-brk -r ts-node/register index.ts"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.17.43",
+    "nodemon": "^3.1.10",
+    "typescript": "^5.8.3"
+  }
+}

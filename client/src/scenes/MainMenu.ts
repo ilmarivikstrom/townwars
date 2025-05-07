@@ -4,8 +4,8 @@ import { Config, Layers } from "../utils/Config.js";
 import Grid from "../ui/Grid.js";
 import { io, Socket } from "socket.io-client";
 
-type TimeApiResponse = {
-  message: number;
+type TimeResponse = {
+  time: number;
 };
 
 export default class MainMenu extends Phaser.Scene {
@@ -14,8 +14,6 @@ export default class MainMenu extends Phaser.Scene {
   private mapEditorButton!: Phaser.GameObjects.Text;
   private settingsButton!: Phaser.GameObjects.Text;
   private grid!: Grid;
-  private innerGrid!: Phaser.GameObjects.Grid;
-  private outerGrid!: Phaser.GameObjects.Grid;
   private sock!: Socket;
 
   constructor() {
@@ -56,30 +54,31 @@ export default class MainMenu extends Phaser.Scene {
     });
     this.add.existing(this.settingsButton);
 
-    this.time.addEvent({
-      delay: 1000,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      // callback: this.updateServerIndicator,
-      callback: this.wsGetTime,
-      callbackScope: this,
-      loop: true,
-    });
-
-    this.sock = io("ws://localhost:5173/", {
-      path: "/townwars/",
-    });
+    this.sock = io("http://localhost:3000/");
     console.log("Socket established:", this.sock);
 
     this.sock.on("connect", () => {
       console.log("Connected to server with ID:", this.sock.id);
+      this.serverIndicator.setText("🟢 Connected");
     });
 
-    this.sock.on("hello", (msg) => {
-      console.log("Server says:", msg);
+    this.sock.on("heartbeat", (msg: TimeResponse) => {
+      this.serverIndicator.setText(
+        `🟢 Connected - Server time: ${msg.time}, ${new Date(
+          msg.time
+        ).toString()}`
+      );
     });
 
-    // Send a message to the server
-    this.sock.emit("client-message", "Hi from modern client!");
+    this.sock.on("disconnect", () => {
+      console.log("Disconnected from server");
+      this.serverIndicator.setText("🔴 Offline");
+    });
+
+    this.sock.on("connect_error", (error) => {
+      console.error("WebSocket connection error:", error);
+      this.serverIndicator.setText("🔴 Offline");
+    });
   }
 
   private createButton(text: string, yOffset: number): Phaser.GameObjects.Text {
@@ -121,51 +120,15 @@ export default class MainMenu extends Phaser.Scene {
       this,
       Config.PADDING_ELEMENTS,
       Config.PADDING_ELEMENTS,
-      "Offline",
+      "🟡 Connecting...",
       {
         backgroundColor: toHexColor(Color.TOOLTIP_BACKGROUND),
-        color: toHexColor(PlayerColor.RED),
+        color: toHexColor(Color.TEXT_DEFAULT),
         padding: { x: Config.PADDING_TEXT, y: Config.PADDING_TEXT },
         fontFamily: "CaskaydiaMono",
       }
     );
     return serverIndicator;
-  }
-
-  private async wsGetTime(): Promise<void> {
-    this.sock.emit("client", "Time please");
-    this.sock.on("response", (msg: string) => {
-      console.log(msg);
-    });
-  }
-
-  private async updateServerIndicator(): Promise<void> {
-    try {
-      const myHeaders = new Headers();
-      myHeaders.append("Content-Type", "application/json");
-
-      const response = await fetch("/api/time", {
-        method: "GET",
-        headers: myHeaders,
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          "Time API status code is " + response.status.toString()
-        );
-      }
-
-      const data: TimeApiResponse = await response.json();
-      console.log("Data received: ", data);
-      const datetimePretty = new Date(0);
-      datetimePretty.setUTCMilliseconds(data.message);
-      this.serverIndicator.setText("Online: " + datetimePretty.toString());
-      this.serverIndicator.setColor(toHexColor(Color.GREEN));
-    } catch (error: unknown) {
-      console.error("Error fetching data:", error);
-      this.serverIndicator.setText("Offline");
-      this.serverIndicator.setColor(toHexColor(PlayerColor.RED));
-    }
   }
 
   public update(): void {}
