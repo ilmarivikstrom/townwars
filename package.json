@@ -11,6 +11,10 @@
     "build": "cd client && npm run build && cd ../server && npm run build"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0"
   }
 }
