@@ -1,0 +1,6 @@
+{
+  "database": {
+    "file": "./db.sqlite",
+    "ensureDir": true
+  }
+}
