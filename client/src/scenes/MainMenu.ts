@@ -131,45 +131,5 @@ export default class MainMenu extends Phaser.Scene {
     return serverIndicator;
   }
 
-  private async wsGetTime(): Promise<void> {
-    console.log("wsgettime called");
-    this.sock.on('connect', () => {
-      console.log('Connected to server with ID:', this.sock.id);
-    });
-    this.sock.emit('client', 'Time please');
-    this.sock.on('response', (msg : string) => {
-      console.log(msg);
-    });
-  }
-
-  private async updateServerIndicator(): Promise<void> {
-    try {
-      const myHeaders = new Headers();
-      myHeaders.append("Content-Type", "application/json");
-
-      const response = await fetch("/api/time", {
-        method: "GET",
-        headers: myHeaders,
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          "Time API status code is " + response.status.toString()
-        );
-      }
-
-      const data: TimeApiResponse = await response.json();
-      console.log("Data received: ", data);
-      const datetimePretty = new Date(0);
-      datetimePretty.setUTCMilliseconds(data.message);
-      this.serverIndicator.setText("Online: " + datetimePretty.toString());
-      this.serverIndicator.setColor(toHexColor(Color.GREEN));
-    } catch (error: unknown) {
-      console.error("Error fetching data:", error);
-      this.serverIndicator.setText("Offline");
-      this.serverIndicator.setColor(toHexColor(PlayerColor.RED));
-    }
-  }
-
   public update(): void {}
 }
