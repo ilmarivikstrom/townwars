@@ -1,114 +1,86 @@
 import Phaser from "phaser";
 import { Color, toHexColor } from "../utils/Color.js";
-import { Config, Layers } from "../utils/Config.js";
+import { Layers } from "../utils/Config.js";
+
+const BUTTON_WIDTH = 60;
+const BUTTON_HEIGHT = 40;
+const TEXT_PADDING = 10;
+const GAP_BETWEEN_TEXT = 0;
+const FONT_FAMILY = "CaskaydiaMono, monospace";
+
+const ALLOWED_STRENGTHS = [0.25, 0.5, 0.75, 1.0];
 
 export default class StrengthUI {
-  private oneQuarterText!: Phaser.GameObjects.Text;
-  private twoQuartersText!: Phaser.GameObjects.Text;
-  private threeQuartersText!: Phaser.GameObjects.Text;
-  private fourQuartersText!: Phaser.GameObjects.Text;
+  private texts: Phaser.GameObjects.Text[] = [];
+  private scene: Phaser.Scene;
 
-  constructor(scene: Phaser.Scene, strength: number) {
-    this.oneQuarterText = scene.add.text(
-      Config.WINDOW_WIDTH / 2,
-      Config.PADDING_ELEMENTS,
-      (0.25 * 100).toFixed(0) + "%",
-      {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    initialStrength: number,
+    config: {
+      buttonWidth?: number;
+      buttonHeight?: number;
+      padding?: number;
+      gap?: number;
+      fontFamily?: string;
+      depth?: number;
+    } = {}
+  ) {
+    this.scene = scene;
+    const {
+      buttonWidth = BUTTON_WIDTH,
+      buttonHeight = BUTTON_HEIGHT,
+      padding = TEXT_PADDING,
+      gap = GAP_BETWEEN_TEXT,
+      fontFamily = FONT_FAMILY,
+    } = config;
+
+    ALLOWED_STRENGTHS.forEach((strength, index) => {
+      const text = scene.add.text(0, 0, `${(strength * 100).toFixed(0)}%`, {
         backgroundColor: toHexColor(Color.TOOLTIP_BACKGROUND),
         color: toHexColor(Color.TEXT_DEFAULT),
-        padding: { x: Config.PADDING_TEXT, y: Config.PADDING_TEXT },
-        fontFamily: "CaskaydiaMono",
-      }
-    );
-    this.oneQuarterText.setDepth(Layers.UI);
-    this.oneQuarterText.setFixedSize(75, 46);
-    this.oneQuarterText.setAlign("center");
-    this.oneQuarterText.setX(
-      this.oneQuarterText.x - this.oneQuarterText.width * 2
-    );
-    this.oneQuarterText.setAlpha(1.0);
+        padding: { x: padding, y: padding },
+        fontFamily,
+        align: "center",
+        fixedWidth: buttonWidth,
+        fixedHeight: buttonHeight,
+      });
+      text.setDepth(Layers.UI);
 
-    this.twoQuartersText = scene.add.text(
-      Config.WINDOW_WIDTH / 2,
-      Config.PADDING_ELEMENTS,
-      (0.5 * 100).toFixed(0) + "%",
-      {
-        backgroundColor: toHexColor(Color.TOOLTIP_BACKGROUND),
-        color: toHexColor(Color.TEXT_DEFAULT),
-        padding: { x: Config.PADDING_TEXT, y: Config.PADDING_TEXT },
-        fontFamily: "CaskaydiaMono",
-      }
-    );
-    this.twoQuartersText.setDepth(Layers.UI);
-    this.twoQuartersText.setFixedSize(75, 46);
-    this.twoQuartersText.setAlign("center");
-    this.twoQuartersText.setX(
-      this.twoQuartersText.x - this.twoQuartersText.width * 1
-    );
-    this.twoQuartersText.setAlpha(1.0);
+      const totalWidth =
+        ALLOWED_STRENGTHS.length * buttonWidth +
+        (ALLOWED_STRENGTHS.length - 1) * gap;
+      const startX = x - totalWidth / 2 + buttonWidth / 2;
+      text.setPosition(startX + index * (buttonWidth + gap), y);
 
-    this.threeQuartersText = scene.add.text(
-      Config.WINDOW_WIDTH / 2,
-      Config.PADDING_ELEMENTS,
-      (0.75 * 100).toFixed(0) + "%",
-      {
-        backgroundColor: toHexColor(Color.TOOLTIP_BACKGROUND),
-        color: toHexColor(Color.TEXT_DEFAULT),
-        padding: { x: Config.PADDING_TEXT, y: Config.PADDING_TEXT },
-        fontFamily: "CaskaydiaMono",
-      }
-    );
-    this.threeQuartersText.setDepth(Layers.UI);
-    this.threeQuartersText.setFixedSize(75, 46);
-    this.threeQuartersText.setAlign("center");
-    this.threeQuartersText.setX(
-      this.threeQuartersText.x - this.threeQuartersText.width * 0
-    );
-    this.threeQuartersText.setAlpha(1.0);
+      this.texts.push(text);
+    });
 
-    this.fourQuartersText = scene.add.text(
-      Config.WINDOW_WIDTH / 2,
-      Config.PADDING_ELEMENTS,
-      (1.0 * 100).toFixed(0) + "%",
-      {
-        backgroundColor: toHexColor(Color.TOOLTIP_BACKGROUND),
-        color: toHexColor(Color.TEXT_DEFAULT),
-        padding: { x: Config.PADDING_TEXT, y: Config.PADDING_TEXT },
-        fontFamily: "CaskaydiaMono",
-      }
-    );
-    this.fourQuartersText.setDepth(Layers.UI);
-    this.fourQuartersText.setFixedSize(75, 46);
-    this.fourQuartersText.setAlign("center");
-    this.fourQuartersText.setX(
-      this.fourQuartersText.x + this.fourQuartersText.width * 1
-    );
-    this.fourQuartersText.setAlpha(1.0);
-
-    this.updateStrengthIndicator(strength);
+    this.updateStrengthIndicator(initialStrength);
   }
 
-  public updateStrengthIndicator(strength: number) {
-    this.oneQuarterText.setBackgroundColor(
-      toHexColor(Color.TOOLTIP_BACKGROUND)
-    );
-    this.twoQuartersText.setBackgroundColor(
-      toHexColor(Color.TOOLTIP_BACKGROUND)
-    );
-    this.threeQuartersText.setBackgroundColor(
-      toHexColor(Color.TOOLTIP_BACKGROUND)
-    );
-    this.fourQuartersText.setBackgroundColor(
-      toHexColor(Color.TOOLTIP_BACKGROUND)
-    );
-    if (strength == 0.25) {
-      this.oneQuarterText.setBackgroundColor(toHexColor(Color.MENU_BLUE));
-    } else if (strength == 0.5) {
-      this.twoQuartersText.setBackgroundColor(toHexColor(Color.MENU_BLUE));
-    } else if (strength == 0.75) {
-      this.threeQuartersText.setBackgroundColor(toHexColor(Color.MENU_BLUE));
-    } else if (strength == 1.0) {
-      this.fourQuartersText.setBackgroundColor(toHexColor(Color.MENU_BLUE));
+  public updateStrengthIndicator(strength: number): void {
+    if (!ALLOWED_STRENGTHS.includes(strength)) {
+      console.warn(
+        `Invalid strength value: ${strength}. Expected one of ${ALLOWED_STRENGTHS.join(
+          ", "
+        )}. Defaulting to the lowest...`
+      );
+      strength = ALLOWED_STRENGTHS[0];
     }
+
+    this.texts.forEach((text) => {
+      text.setBackgroundColor(toHexColor(Color.TOOLTIP_BACKGROUND));
+    });
+
+    const index = ALLOWED_STRENGTHS.indexOf(strength);
+    this.texts[index].setBackgroundColor(toHexColor(Color.MENU_BLUE));
+  }
+
+  public destroy(): void {
+    this.texts.forEach((text) => text.destroy());
+    this.texts = [];
   }
 }
