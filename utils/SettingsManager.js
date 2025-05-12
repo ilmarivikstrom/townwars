@@ -5,6 +5,9 @@ const DEFAULT_SETTINGS = {
 function isPlayerColorValue(value) {
     return Object.values(PlayerColor).includes(value);
 }
+const validators = {
+    playerColor: isPlayerColorValue,
+};
 class SettingsManager {
     constructor() {
         this.settings = this.loadSettings();
@@ -29,10 +32,15 @@ class SettingsManager {
     }
     validateSettings(data) {
         const validated = { ...DEFAULT_SETTINGS };
-        if (typeof data === "object" && data !== null && "playerColor" in data) {
-            const maybeColor = data.playerColor;
-            if (isPlayerColorValue(maybeColor)) {
-                validated.playerColor = maybeColor;
+        if (typeof data === "object" && data !== null) {
+            for (const [key, value] of Object.entries(data)) {
+                if (key in validators &&
+                    validators[key]?.(value)) {
+                    validated[key] = value;
+                }
+                else if (!(key in DEFAULT_SETTINGS)) {
+                    validated[key] = value;
+                }
             }
         }
         return validated;
@@ -44,16 +52,19 @@ class SettingsManager {
         return this.settings[key];
     }
     set(key, value) {
-        if (key in DEFAULT_SETTINGS) {
-            this.settings[key] = value;
-            this.saveSettings();
+        if (key in validators && !validators[key]?.(value)) {
+            console.warn(`Invalid value for key: ${key}`);
+            return;
         }
-        else {
-            console.warn(`Attempted to set invalid key: ${String(key)}`);
-        }
+        this.settings[key] = value;
+        this.saveSettings();
     }
     getAll() {
         return { ...this.settings };
+    }
+    resetToDefaults() {
+        this.settings = { ...DEFAULT_SETTINGS };
+        this.saveSettings();
     }
 }
 export default SettingsManager.instance;

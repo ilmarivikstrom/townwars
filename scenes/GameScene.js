@@ -84,7 +84,7 @@ export default class GameScene extends Phaser.Scene {
             this.dragIndicator.destroy();
             this.updateEdges();
         });
-        this.game.events.on("settingPlayerColorChanged", () => {
+        this.game.events.on("playerColorChanged", () => {
             for (const node of this.nodes) {
                 node.setOwnerAndColor(node.owner);
                 node.setPointLightColor();
@@ -194,7 +194,6 @@ export default class GameScene extends Phaser.Scene {
     removeDuplicateEdges(newEdges) {
         const seen = new Set();
         return newEdges.filter((edge) => {
-            console.log(`${edge.getCenter().x.toFixed()},${edge.getCenter().y.toFixed(0)}`);
             const key = `${edge.getCenter().x.toFixed()},${edge
                 .getCenter()
                 .y.toFixed(0)}`;
