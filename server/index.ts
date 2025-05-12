@@ -27,7 +27,11 @@ const db = initDB(config.dbFile);
 function checkUser(userID: string) {
   console.log("Checking user...");
   let user = db.get("SELECT * FROM users WHERE id = ?", [userID]);
-  console.log("User found: ", user);
+  if (user === undefined) {
+    console.log("User not found!");
+  } else {
+    console.log("User found: ", user);
+  }
 }
 
 ioServer.on("connection", (socket: Socket) => {
