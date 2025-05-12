@@ -4,10 +4,6 @@ import { Config, Layers } from "../utils/Config.js";
 import Grid from "../ui/Grid.js";
 import { io, Socket } from "socket.io-client";
 
-type TimeResponse = {
-  time: number;
-};
-
 export default class MainMenu extends Phaser.Scene {
   private serverIndicator!: Phaser.GameObjects.Text;
   private startGameButton!: Phaser.GameObjects.Text;
@@ -15,6 +11,7 @@ export default class MainMenu extends Phaser.Scene {
   private settingsButton!: Phaser.GameObjects.Text;
   private grid!: Grid;
   private sock!: Socket;
+  private roundTripTime: number = 0;
 
   constructor() {
     super("MainMenu");
@@ -59,15 +56,22 @@ export default class MainMenu extends Phaser.Scene {
 
     this.sock.on("connect", () => {
       console.log("Connected to server with ID:", this.sock.id);
-      this.serverIndicator.setText("🟢 Connected");
+      this.serverIndicator.setText(`🟢 Connected (${this.roundTripTime}ms)`);
     });
 
-    this.sock.on("heartbeat", (msg: TimeResponse) => {
+    this.sock.on("heartbeat", (serverTimestamp) => {
       this.serverIndicator.setText(
-        `🟢 Connected - Server time: ${msg.time}, ${new Date(
-          msg.time
-        ).toString()}`
+        `🟢 Connected (${this.roundTripTime}ms) ${serverTimestamp}`
       );
+    });
+
+    const timeInterval = setInterval(() => {
+      this.sock.emit("ping", Date.now());
+    }, 100);
+
+    this.sock.on("pong", (pingTimestamp: number) => {
+      const delta = Date.now() - pingTimestamp;
+      this.roundTripTime = delta;
     });
 
     this.sock.on("disconnect", () => {

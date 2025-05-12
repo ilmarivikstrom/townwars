@@ -36,12 +36,16 @@ ioServer.on("connection", (socket: Socket) => {
   socket.emit("heartbeat", { time: Date.now() });
 
   const timeInterval = setInterval(() => {
-    socket.emit("heartbeat", { time: Date.now() });
-  }, 1000);
+    socket.emit("heartbeat", Date.now());
+  }, 100);
 
   socket.on("disconnect", (reason: DisconnectReason) => {
     console.log("user with socket disconnected, reason: " + reason);
     clearInterval(timeInterval);
+  });
+
+  socket.on("ping", (pingTimestamp: number) => {
+    socket.emit("pong", pingTimestamp);
   });
 
   socket.on("error", (error: Error) => {
