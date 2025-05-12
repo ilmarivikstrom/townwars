@@ -39,7 +39,7 @@ export default class SettingsScene extends Phaser.Scene {
             }
             colorOptionButton.setAlpha(1.0);
             SettingsManager.set("playerColor", color);
-            this.game.events.emit("playerColorChanged");
+            this.game.events.emit("settingPlayerColorChanged");
         });
     }
     createPlayerColorIndicator(text) {
