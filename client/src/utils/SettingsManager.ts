@@ -1,20 +1,28 @@
 import { PlayerColor, PlayerColorValue } from "./Color.js";
 
-interface GameSettings {
+interface KnownSettings {
   playerColor: PlayerColorValue;
 }
 
-const DEFAULT_SETTINGS: GameSettings = {
+const DEFAULT_SETTINGS: KnownSettings = {
   playerColor: PlayerColor.DEFAULT,
 };
+
+type Settings = KnownSettings & Record<string, unknown>;
 
 function isPlayerColorValue(value: unknown): value is PlayerColorValue {
   return Object.values(PlayerColor).includes(value as PlayerColorValue);
 }
 
+const validators: Partial<
+  Record<keyof KnownSettings, (value: unknown) => boolean>
+> = {
+  playerColor: isPlayerColorValue,
+};
+
 class SettingsManager {
   private static _instance: SettingsManager;
-  private settings: GameSettings;
+  private settings: Settings;
 
   private constructor() {
     this.settings = this.loadSettings();
@@ -28,7 +36,7 @@ class SettingsManager {
     return SettingsManager._instance;
   }
 
-  private loadSettings(): GameSettings {
+  private loadSettings(): Settings {
     try {
       const raw = localStorage.getItem("settings");
       const parsed = raw ? JSON.parse(raw) : {};
@@ -39,13 +47,19 @@ class SettingsManager {
     }
   }
 
-  private validateSettings(data: unknown): GameSettings {
-    const validated: GameSettings = { ...DEFAULT_SETTINGS };
+  private validateSettings(data: unknown): Settings {
+    const validated: Settings = { ...DEFAULT_SETTINGS };
 
-    if (typeof data === "object" && data !== null && "playerColor" in data) {
-      const maybeColor = (data as Record<string, unknown>).playerColor;
-      if (isPlayerColorValue(maybeColor)) {
-        validated.playerColor = maybeColor;
+    if (typeof data === "object" && data !== null) {
+      for (const [key, value] of Object.entries(data)) {
+        if (
+          key in validators &&
+          validators[key as keyof KnownSettings]?.(value)
+        ) {
+          validated[key] = value;
+        } else if (!(key in DEFAULT_SETTINGS)) {
+          validated[key] = value;
+        }
       }
     }
 
@@ -56,24 +70,33 @@ class SettingsManager {
     localStorage.setItem("settings", JSON.stringify(this.settings));
   }
 
-  public get<K extends keyof GameSettings>(key: K): GameSettings[K] {
+  public get<K extends keyof KnownSettings>(key: K): KnownSettings[K];
+  public get<T = unknown>(key: string): T | undefined;
+  public get(key: string): unknown {
     return this.settings[key];
   }
 
-  public set<K extends keyof GameSettings>(
+  public set<K extends keyof KnownSettings>(
     key: K,
-    value: GameSettings[K]
-  ): void {
-    if (key in DEFAULT_SETTINGS) {
-      this.settings[key] = value;
-      this.saveSettings();
-    } else {
-      console.warn(`Attempted to set invalid key: ${String(key)}`);
+    value: KnownSettings[K]
+  ): void;
+  public set<T = unknown>(key: string, value: T): void;
+  public set(key: string, value: unknown): void {
+    if (key in validators && !validators[key as keyof KnownSettings]?.(value)) {
+      console.warn(`Invalid value for key: ${key}`);
+      return;
     }
+    this.settings[key] = value;
+    this.saveSettings();
   }
 
-  public getAll(): GameSettings {
+  public getAll(): Settings {
     return { ...this.settings };
+  }
+
+  public resetToDefaults(): void {
+    this.settings = { ...DEFAULT_SETTINGS };
+    this.saveSettings();
   }
 }
 

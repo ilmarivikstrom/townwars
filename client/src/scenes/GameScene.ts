@@ -5,7 +5,7 @@ import DebugUI from "../ui/DebugUI.js";
 import DragIndicator from "../entities/DragIndicator.js";
 import Node from "../entities/Node.js";
 import StatisticsUI from "../ui/StatisticsUI.js";
-import { Color } from "../utils/Color.js";
+import { Color, PlayerColorValue } from "../utils/Color.js";
 import { findNodeAtPoint } from "../utils/Math.js";
 import SettingsManager from "../utils/SettingsManager.js";
 import Grid from "../ui/Grid.js";
@@ -117,7 +117,7 @@ export default class GameScene extends Phaser.Scene {
       }
     );
 
-    this.game.events.on("settingPlayerColorChanged", () => {
+    this.game.events.on("playerColorChanged", () => {
       for (const node of this.nodes) {
         node.setOwnerAndColor(node.owner);
         node.setPointLightColor();
@@ -262,9 +262,6 @@ export default class GameScene extends Phaser.Scene {
   ): Phaser.GameObjects.Line[] {
     const seen = new Set<string>();
     return newEdges.filter((edge) => {
-      console.log(
-        `${edge.getCenter().x.toFixed()},${edge.getCenter().y.toFixed(0)}`
-      );
       const key = `${edge.getCenter().x.toFixed()},${edge
         .getCenter()
         .y.toFixed(0)}`;
