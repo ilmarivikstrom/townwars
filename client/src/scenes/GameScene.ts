@@ -17,7 +17,7 @@ export default class GameScene extends Phaser.Scene {
   private edges: Phaser.GameObjects.Line[] = [];
   private dragIndicator!: DragIndicator;
   private debugUI!: DebugUI;
-  private dragUI!: StrengthUI;
+  private strengthUI!: StrengthUI;
   private statisticsUI!: StatisticsUI;
   private currentUserId: string = uuid();
   private ctrlButtonDown: boolean = false;
@@ -38,7 +38,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.debugUI = new DebugUI(this);
     this.statisticsUI = new StatisticsUI(this);
-    this.dragUI = new StrengthUI(this, this.currentStrength);
+    this.strengthUI = new StrengthUI(this, this.currentStrength);
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.button === 0) {
@@ -111,7 +111,7 @@ export default class GameScene extends Phaser.Scene {
       }
     );
 
-    this.game.events.on("playerColorChanged", () => {
+    this.game.events.on("settingPlayerColorChanged", () => {
       for (const node of this.nodes) {
         node.setOwnerAndColor(node.owner);
         node.setPointLightColor();
@@ -156,22 +156,22 @@ export default class GameScene extends Phaser.Scene {
     });
 
     this.input.keyboard?.on("keydown-ONE", () => {
-      this.dragUI.updateStrengthIndicator(DRAG_STRENGTHS[0]);
+      this.strengthUI.updateStrengthIndicator(DRAG_STRENGTHS[0]);
       this.currentStrength = DRAG_STRENGTHS[0];
     });
 
     this.input.keyboard?.on("keydown-TWO", () => {
-      this.dragUI.updateStrengthIndicator(DRAG_STRENGTHS[1]);
+      this.strengthUI.updateStrengthIndicator(DRAG_STRENGTHS[1]);
       this.currentStrength = DRAG_STRENGTHS[1];
     });
 
     this.input.keyboard?.on("keydown-THREE", () => {
-      this.dragUI.updateStrengthIndicator(DRAG_STRENGTHS[2]);
+      this.strengthUI.updateStrengthIndicator(DRAG_STRENGTHS[2]);
       this.currentStrength = DRAG_STRENGTHS[2];
     });
 
     this.input.keyboard?.on("keydown-FOUR", () => {
-      this.dragUI.updateStrengthIndicator(DRAG_STRENGTHS[3]);
+      this.strengthUI.updateStrengthIndicator(DRAG_STRENGTHS[3]);
       this.currentStrength = DRAG_STRENGTHS[3];
     });
   }

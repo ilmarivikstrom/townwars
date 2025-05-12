@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { Color, PlayerColor, toHexColor } from "../utils/Color.js";
+import { Color, toHexColor } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
 import Grid from "../ui/Grid.js";
 import { io, Socket } from "socket.io-client";
