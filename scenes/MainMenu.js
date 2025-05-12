@@ -6,6 +6,7 @@ import { io } from "socket.io-client";
 export default class MainMenu extends Phaser.Scene {
     constructor() {
         super("MainMenu");
+        this.roundTripTime = 0;
     }
     preload() { }
     create() {
@@ -39,10 +40,17 @@ export default class MainMenu extends Phaser.Scene {
         console.log("Socket established:", this.sock);
         this.sock.on("connect", () => {
             console.log("Connected to server with ID:", this.sock.id);
-            this.serverIndicator.setText("🟢 Connected");
+            this.serverIndicator.setText(`🟢 Connected (${this.roundTripTime}ms)`);
         });
-        this.sock.on("heartbeat", (msg) => {
-            this.serverIndicator.setText(`🟢 Connected - Server time: ${msg.time}, ${new Date(msg.time).toString()}`);
+        this.sock.on("heartbeat", (serverTimestamp) => {
+            this.serverIndicator.setText(`🟢 Connected (${this.roundTripTime}ms) ${serverTimestamp}`);
+        });
+        const timeInterval = setInterval(() => {
+            this.sock.emit("ping", Date.now());
+        }, 100);
+        this.sock.on("pong", (pingTimestamp) => {
+            const delta = Date.now() - pingTimestamp;
+            this.roundTripTime = delta;
         });
         this.sock.on("disconnect", () => {
             console.log("Disconnected from server");
