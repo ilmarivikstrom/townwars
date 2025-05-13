@@ -2,17 +2,20 @@ import Phaser from "phaser";
 import { Color, toHexColor } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
 import Grid from "../ui/Grid.js";
-import { io } from "socket.io-client";
 export default class MainMenu extends Phaser.Scene {
     constructor() {
         super("MainMenu");
-        this.roundTripTime = 0;
     }
     preload() { }
     create() {
-        this.grid = new Grid(this);
         this.serverIndicator = this.createServerIndicator();
         this.add.existing(this.serverIndicator);
+        this.socketManager = this.registry.get("socketManager");
+        this.socketManager.on("connect", this.updateServerIndicator, this);
+        this.socketManager.on("disconnect", this.updateServerIndicator, this);
+        this.socketManager.on("connect_error", this.updateServerIndicator, this);
+        this.socketManager.on("pong", this.updateServerIndicator, this);
+        this.grid = new Grid(this);
         this.startGameButton = this.createButton("start game", 0);
         this.startGameButton.on("pointerdown", (pointer) => {
             if (pointer.button === 0) {
@@ -36,30 +39,13 @@ export default class MainMenu extends Phaser.Scene {
             }
         });
         this.add.existing(this.settingsButton);
-        this.sock = io("http://localhost:3000/");
-        console.log("Socket established:", this.sock);
-        this.sock.on("connect", () => {
-            console.log("Connected to server with ID:", this.sock.id);
-            this.serverIndicator.setText(`🟢 Connected (${this.roundTripTime}ms)`);
-        });
-        this.sock.on("heartbeat", (serverTimestamp) => {
-            this.serverIndicator.setText(`🟢 Connected (${this.roundTripTime}ms) ${serverTimestamp}`);
-        });
-        const timeInterval = setInterval(() => {
-            this.sock.emit("ping", Date.now());
-        }, 100);
-        this.sock.on("pong", (pingTimestamp) => {
-            const delta = Date.now() - pingTimestamp;
-            this.roundTripTime = delta;
-        });
-        this.sock.on("disconnect", () => {
-            console.log("Disconnected from server");
-            this.serverIndicator.setText("🔴 Offline");
-        });
-        this.sock.on("connect_error", (error) => {
-            console.error("WebSocket connection error:", error);
-            this.serverIndicator.setText("🔴 Offline");
-        });
+    }
+    updateServerIndicator() {
+        const isConnected = this.socketManager.isConnected();
+        const text = isConnected
+            ? `🟢 Connected (${this.socketManager.getRoundTripTime()}ms)`
+            : "🔴 Offline";
+        this.serverIndicator.setText(text);
     }
     createButton(text, yOffset) {
         const button = new Phaser.GameObjects.Text(this, Config.WINDOW_WIDTH / 2, Config.WINDOW_HEIGHT / 2 + yOffset, text, {
@@ -91,6 +77,12 @@ export default class MainMenu extends Phaser.Scene {
             fontFamily: "CaskaydiaMono",
         });
         return serverIndicator;
+    }
+    shutdown() {
+        this.socketManager.off("connect", this.updateServerIndicator, this);
+        this.socketManager.off("disconnect", this.updateServerIndicator, this);
+        this.socketManager.off("connect_error", this.updateServerIndicator, this);
+        this.socketManager.off("pong", this.updateServerIndicator, this);
     }
     update() { }
 }
