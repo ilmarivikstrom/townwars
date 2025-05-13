@@ -2,16 +2,15 @@ import Phaser from "phaser";
 import { Color, toHexColor } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
 import Grid from "../ui/Grid.js";
-import { io, Socket } from "socket.io-client";
+import { SocketManager } from "../networking/SocketManager.js";
 
 export default class MainMenu extends Phaser.Scene {
+  private socketManager!: SocketManager;
   private serverIndicator!: Phaser.GameObjects.Text;
   private startGameButton!: Phaser.GameObjects.Text;
   private mapEditorButton!: Phaser.GameObjects.Text;
   private settingsButton!: Phaser.GameObjects.Text;
   private grid!: Grid;
-  private sock!: Socket;
-  private roundTripTime: number = 0;
 
   constructor() {
     super("MainMenu");
@@ -20,10 +19,16 @@ export default class MainMenu extends Phaser.Scene {
   public preload() {}
 
   public create() {
-    this.grid = new Grid(this);
-
     this.serverIndicator = this.createServerIndicator();
     this.add.existing(this.serverIndicator);
+
+    this.socketManager = this.registry.get("socketManager");
+    this.socketManager.on("connect", this.updateServerIndicator, this);
+    this.socketManager.on("disconnect", this.updateServerIndicator, this);
+    this.socketManager.on("connect_error", this.updateServerIndicator, this);
+    this.socketManager.on("pong", this.updateServerIndicator, this);
+
+    this.grid = new Grid(this);
 
     this.startGameButton = this.createButton("start game", 0);
     this.startGameButton.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
@@ -50,39 +55,14 @@ export default class MainMenu extends Phaser.Scene {
       }
     });
     this.add.existing(this.settingsButton);
+  }
 
-    this.sock = io("http://localhost:3000/");
-    console.log("Socket established:", this.sock);
-
-    this.sock.on("connect", () => {
-      console.log("Connected to server with ID:", this.sock.id);
-      this.serverIndicator.setText(`🟢 Connected (${this.roundTripTime}ms)`);
-    });
-
-    this.sock.on("heartbeat", (serverTimestamp) => {
-      this.serverIndicator.setText(
-        `🟢 Connected (${this.roundTripTime}ms) ${serverTimestamp}`
-      );
-    });
-
-    const timeInterval = setInterval(() => {
-      this.sock.emit("ping", Date.now());
-    }, 100);
-
-    this.sock.on("pong", (pingTimestamp: number) => {
-      const delta = Date.now() - pingTimestamp;
-      this.roundTripTime = delta;
-    });
-
-    this.sock.on("disconnect", () => {
-      console.log("Disconnected from server");
-      this.serverIndicator.setText("🔴 Offline");
-    });
-
-    this.sock.on("connect_error", (error) => {
-      console.error("WebSocket connection error:", error);
-      this.serverIndicator.setText("🔴 Offline");
-    });
+  private updateServerIndicator(): void {
+    const isConnected = this.socketManager.isConnected();
+    const text = isConnected
+      ? `🟢 Connected (${this.socketManager.getRoundTripTime()}ms)`
+      : "🔴 Offline";
+    this.serverIndicator.setText(text);
   }
 
   private createButton(text: string, yOffset: number): Phaser.GameObjects.Text {
@@ -133,6 +113,13 @@ export default class MainMenu extends Phaser.Scene {
       }
     );
     return serverIndicator;
+  }
+
+  public shutdown(): void {
+    this.socketManager.off("connect", this.updateServerIndicator, this);
+    this.socketManager.off("disconnect", this.updateServerIndicator, this);
+    this.socketManager.off("connect_error", this.updateServerIndicator, this);
+    this.socketManager.off("pong", this.updateServerIndicator, this);
   }
 
   public update(): void {}
