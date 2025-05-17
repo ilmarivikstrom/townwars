@@ -4,13 +4,12 @@ import { ATTACK_STRENGTHS, Layers } from "../utils/Config.js";
 const BUTTON_WIDTH = 60;
 const BUTTON_HEIGHT = 40;
 const TEXT_PADDING = 10;
-const GAP_BETWEEN_TEXT = 0;
 const FONT_FAMILY = "CaskaydiaMono, monospace";
 export default class StrengthUI {
     constructor(scene, x, y, initialStrength, config = {}) {
         this.texts = [];
         this.scene = scene;
-        const { buttonWidth = BUTTON_WIDTH, buttonHeight = BUTTON_HEIGHT, padding = TEXT_PADDING, gap = GAP_BETWEEN_TEXT, fontFamily = FONT_FAMILY, } = config;
+        const { buttonWidth = BUTTON_WIDTH, buttonHeight = BUTTON_HEIGHT, padding = TEXT_PADDING, fontFamily = FONT_FAMILY, } = config;
         ATTACK_STRENGTHS.forEach((strength, index) => {
             const text = scene.add.text(0, 0, `${(strength * 100).toFixed(0)}%`, {
                 backgroundColor: toHexColor(Color.TOOLTIP_BACKGROUND),
@@ -22,10 +21,9 @@ export default class StrengthUI {
                 fixedHeight: buttonHeight,
             });
             text.setDepth(Layers.UI);
-            const totalWidth = ATTACK_STRENGTHS.length * buttonWidth +
-                (ATTACK_STRENGTHS.length - 1) * gap;
-            const startX = x - totalWidth / 2 + buttonWidth / 2;
-            text.setPosition(startX + index * (buttonWidth + gap), y);
+            const totalWidth = ATTACK_STRENGTHS.length * buttonWidth;
+            const startX = x - totalWidth / 2;
+            text.setPosition(startX + index * buttonWidth, y);
             text.setInteractive({
                 hitArea: new Phaser.Geom.Rectangle(0, 0, text.width, text.height),
                 // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -37,6 +35,10 @@ export default class StrengthUI {
             });
             this.texts.push(text);
         });
+        this.title = scene.add.text(x, y + 55, "Attack strength", {
+            color: toHexColor(Color.TEXT_DEFAULT),
+        });
+        this.title.setOrigin(0.5, 0.5);
         this.updateStrengthIndicator(initialStrength);
     }
     updateStrengthIndicator(strength) {

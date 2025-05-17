@@ -18,8 +18,8 @@ export default class GameScene extends Phaser.Scene {
         this.nodes = [];
         this.edges = [];
         this.currentUserId = uuid();
-        this.ctrlButtonDown = false;
-        this.shiftButtonDown = false;
+        this.vacantNodeButtonDown = false;
+        this.ownNodeButtonDown = false;
         this.currentStrength = ATTACK_STRENGTHS[1];
     }
     preload() {
@@ -37,11 +37,11 @@ export default class GameScene extends Phaser.Scene {
         this.strengthUI = new StrengthUI(this, Config.WINDOW_WIDTH / 2, Config.PADDING_ELEMENTS, this.currentStrength);
         this.input.on("pointerdown", (pointer) => {
             if (pointer.button === 0) {
-                if (this.ctrlButtonDown) {
+                if (this.vacantNodeButtonDown) {
                     this.tryCreateNewNode(pointer.x, pointer.y, "");
                     this.updateEdges();
                 }
-                else if (this.shiftButtonDown) {
+                else if (this.ownNodeButtonDown) {
                     this.tryCreateNewNode(pointer.x, pointer.y, this.currentUserId);
                     this.updateEdges();
                 }
@@ -109,22 +109,22 @@ export default class GameScene extends Phaser.Scene {
             this.debugUI.toggleVisibility();
         });
         this.input.keyboard?.on(`keydown-${Keys.VACANT_NODE_MODIFIER}`, () => {
-            this.ctrlButtonDown = true;
+            this.vacantNodeButtonDown = true;
         });
         this.input.keyboard?.on(`keyup-${Keys.VACANT_NODE_MODIFIER}`, () => {
-            this.ctrlButtonDown = false;
+            this.vacantNodeButtonDown = false;
         });
         this.input.keyboard?.on(`keydown-${Keys.VACANT_NODE_MODIFIER_MAC}`, () => {
-            this.ctrlButtonDown = true;
+            this.vacantNodeButtonDown = true;
         });
         this.input.keyboard?.on(`keydown-${Keys.VACANT_NODE_MODIFIER_MAC}`, () => {
-            this.ctrlButtonDown = false;
+            this.vacantNodeButtonDown = false;
         });
         this.input.keyboard?.on(`keydown-${Keys.OWN_NODE_MODIFIER}`, () => {
-            this.shiftButtonDown = true;
+            this.ownNodeButtonDown = true;
         });
         this.input.keyboard?.on(`keyup-${Keys.OWN_NODE_MODIFIER}`, () => {
-            this.shiftButtonDown = false;
+            this.ownNodeButtonDown = false;
         });
         this.input.keyboard?.on(`keydown-${Keys.QUIT}`, () => {
             this.scene.switch("MainMenu");
