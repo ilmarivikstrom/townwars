@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { Color, PlayerColor, toHexColor, } from "../utils/Color.js";
-import { Config, Layers } from "../utils/Config.js";
+import { Config, Keys, Layers } from "../utils/Config.js";
 import SettingsManager from "../utils/SettingsManager.js";
 import Grid from "../ui/Grid.js";
 class UIFactory {
@@ -40,7 +40,7 @@ export default class SettingsScene extends Phaser.Scene {
         this.createSettingsUI();
     }
     setupKeyboardInput() {
-        this.input.keyboard?.on("keydown-ESC", () => {
+        this.input.keyboard?.on(`keydown-${Keys.QUIT}`, () => {
             this.scene.switch("MainMenu");
         });
     }
