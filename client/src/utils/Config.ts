@@ -16,3 +16,18 @@ export enum Layers {
   NODE_TOOLTIP,
   UI,
 }
+
+export const Keys = {
+  CLEAR: "C",
+  DEBUG_UI_TOGGLE: "D",
+  VACANT_NODE_MODIFIER: "CTRL",
+  VACANT_NODE_MODIFIER_MAC: "A",
+  OWN_NODE_MODIFIER: "SHIFT",
+  QUIT: "ESC",
+  STRENGTH_0: "ONE",
+  STRENGTH_1: "TWO",
+  STRENGTH_2: "THREE",
+  STRENGTH_3: "FOUR",
+};
+
+export const ATTACK_STRENGTHS = [0.25, 0.5, 0.75, 1.0];

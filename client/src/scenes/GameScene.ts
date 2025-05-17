@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
 import Phaser from "phaser";
-import { Config } from "../utils/Config.js";
+import { ATTACK_STRENGTHS, Config, Keys } from "../utils/Config.js";
 import DebugUI from "../ui/DebugUI.js";
 import DragIndicator from "../entities/DragIndicator.js";
 import Node from "../entities/Node.js";
@@ -10,8 +10,6 @@ import { findNodeAtPoint } from "../utils/Math.js";
 import SettingsManager from "../utils/SettingsManager.js";
 import Grid from "../ui/Grid.js";
 import StrengthUI from "../ui/StrengthUI.js";
-
-const ALLOWED_STRENGTHS = [0.25, 0.5, 0.75, 1.0];
 
 export default class GameScene extends Phaser.Scene {
   private nodes: Node[] = [];
@@ -24,7 +22,7 @@ export default class GameScene extends Phaser.Scene {
   private ctrlButtonDown: boolean = false;
   private shiftButtonDown: boolean = false;
   private grid!: Grid;
-  private currentStrength = ALLOWED_STRENGTHS[1];
+  private currentStrength = ATTACK_STRENGTHS[1];
 
   public constructor() {
     super("GameScene");
@@ -117,6 +115,11 @@ export default class GameScene extends Phaser.Scene {
       }
     );
 
+    this.events.on("strengthSelected", (strength: number) => {
+      this.strengthUI.updateStrengthIndicator(strength);
+      this.currentStrength = strength;
+    });
+
     this.game.events.on("playerColorChanged", () => {
       for (const node of this.nodes) {
         node.setOwnerAndColor(node.owner);
@@ -125,60 +128,60 @@ export default class GameScene extends Phaser.Scene {
       this.updateEdges();
     });
 
-    this.input.keyboard?.on("keydown-C", () => {
+    this.input.keyboard?.on(`keydown-${Keys.CLEAR}`, () => {
       this.deleteNodes();
     });
 
-    this.input.keyboard?.on("keydown-D", () => {
+    this.input.keyboard?.on(`keydown-${Keys.DEBUG_UI_TOGGLE}`, () => {
       this.debugUI.toggleVisibility();
     });
 
-    this.input.keyboard?.on("keydown-CTRL", () => {
+    this.input.keyboard?.on(`keydown-${Keys.VACANT_NODE_MODIFIER}`, () => {
       this.ctrlButtonDown = true;
     });
 
-    this.input.keyboard?.on("keyup-CTRL", () => {
+    this.input.keyboard?.on(`keyup-${Keys.VACANT_NODE_MODIFIER}`, () => {
       this.ctrlButtonDown = false;
     });
 
-    this.input.keyboard?.on("keydown-SHIFT", () => {
+    this.input.keyboard?.on(`keydown-${Keys.VACANT_NODE_MODIFIER_MAC}`, () => {
+      this.ctrlButtonDown = true;
+    });
+
+    this.input.keyboard?.on(`keydown-${Keys.VACANT_NODE_MODIFIER_MAC}`, () => {
+      this.ctrlButtonDown = false;
+    });
+
+    this.input.keyboard?.on(`keydown-${Keys.OWN_NODE_MODIFIER}`, () => {
       this.shiftButtonDown = true;
     });
 
-    this.input.keyboard?.on("keyup-SHIFT", () => {
+    this.input.keyboard?.on(`keyup-${Keys.OWN_NODE_MODIFIER}`, () => {
       this.shiftButtonDown = false;
     });
 
-    this.input.keyboard?.on("keydown-A", () => {
-      this.ctrlButtonDown = true;
-    });
-
-    this.input.keyboard?.on("keyup-A", () => {
-      this.ctrlButtonDown = false;
-    });
-
-    this.input.keyboard?.on("keydown-ESC", () => {
+    this.input.keyboard?.on(`keydown-${Keys.QUIT}`, () => {
       this.scene.switch("MainMenu");
     });
 
-    this.input.keyboard?.on("keydown-ONE", () => {
-      this.strengthUI.updateStrengthIndicator(ALLOWED_STRENGTHS[0]);
-      this.currentStrength = ALLOWED_STRENGTHS[0];
+    this.input.keyboard?.on(`keydown-${Keys.STRENGTH_0}`, () => {
+      this.strengthUI.updateStrengthIndicator(ATTACK_STRENGTHS[0]);
+      this.currentStrength = ATTACK_STRENGTHS[0];
     });
 
-    this.input.keyboard?.on("keydown-TWO", () => {
-      this.strengthUI.updateStrengthIndicator(ALLOWED_STRENGTHS[1]);
-      this.currentStrength = ALLOWED_STRENGTHS[1];
+    this.input.keyboard?.on(`keydown-${Keys.STRENGTH_1}`, () => {
+      this.strengthUI.updateStrengthIndicator(ATTACK_STRENGTHS[1]);
+      this.currentStrength = ATTACK_STRENGTHS[1];
     });
 
-    this.input.keyboard?.on("keydown-THREE", () => {
-      this.strengthUI.updateStrengthIndicator(ALLOWED_STRENGTHS[2]);
-      this.currentStrength = ALLOWED_STRENGTHS[2];
+    this.input.keyboard?.on(`keydown-${Keys.STRENGTH_2}`, () => {
+      this.strengthUI.updateStrengthIndicator(ATTACK_STRENGTHS[2]);
+      this.currentStrength = ATTACK_STRENGTHS[2];
     });
 
-    this.input.keyboard?.on("keydown-FOUR", () => {
-      this.strengthUI.updateStrengthIndicator(ALLOWED_STRENGTHS[3]);
-      this.currentStrength = ALLOWED_STRENGTHS[3];
+    this.input.keyboard?.on(`keydown-${Keys.STRENGTH_3}`, () => {
+      this.strengthUI.updateStrengthIndicator(ATTACK_STRENGTHS[3]);
+      this.currentStrength = ATTACK_STRENGTHS[3];
     });
   }
 
