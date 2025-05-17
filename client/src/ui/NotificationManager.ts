@@ -44,13 +44,13 @@ export default class NotificationManager {
   updatePositions() {
     this.notifications.forEach((notification, index) => {
       const targetY =
-        Config.WINDOW_HEIGHT -
-        50 -
-        (this.notificationHeight + this.spacing) * index;
+        Config.WINDOW_HEIGHT +
+        (this.notificationHeight + this.spacing) *
+          (index - this.notifications.length);
       this.scene.tweens.add({
         targets: notification,
         y: targetY,
-        duration: 300,
+        duration: 200,
         ease: "Power2",
       });
     });

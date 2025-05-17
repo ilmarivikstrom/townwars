@@ -29,20 +29,20 @@ export default class Notification extends Phaser.GameObjects.Container {
     const height = 50;
     const padding = 10;
 
-    const background = scene.add.rectangle(0, 0, width, height, 0x000000, 0.9);
+    const background = scene.add.rectangle(0, 0, width, height, 0x000000, 0.75);
     background.setOrigin(0.5, 0.5);
     background.setStrokeStyle(2, NotificationColors[type], 1);
 
-    const titleText = scene.add.text(0, -height / 4, title, {
-      fontSize: "14px",
+    const titleText = scene.add.text(0, -height / 5, title, {
+      fontSize: "12px",
       color: toHexColor(NotificationColors[type]),
       fontStyle: "bold",
     });
     titleText.setOrigin(0.5, 0.5);
 
-    const messageText = scene.add.text(0, height / 4, message, {
+    const messageText = scene.add.text(0, height / 5, message, {
       fontSize: "12px",
-      color: "#FFFFFF",
+      color: toHexColor(Color.WHITE),
       wordWrap: { width: width - padding * 2 },
       align: "center",
     });

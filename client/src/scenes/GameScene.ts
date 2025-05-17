@@ -208,7 +208,7 @@ export default class GameScene extends Phaser.Scene {
       ) {
         this.notificationManager.showNotification(
           "Node not created",
-          `Couldn't fit...`,
+          `Not enough space`,
           NotificationType.WARNING
         );
         return;
