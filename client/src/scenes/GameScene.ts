@@ -1,6 +1,11 @@
 import { v4 as uuid } from "uuid";
 import Phaser from "phaser";
-import { ATTACK_STRENGTHS, Config, Keys } from "../utils/Config.js";
+import {
+  ATTACK_STRENGTHS,
+  Config,
+  Keys,
+  KeySpriteIndices,
+} from "../utils/Config.js";
 import DebugUI from "../ui/DebugUI.js";
 import DragIndicator from "../entities/DragIndicator.js";
 import Node from "../entities/Node.js";
@@ -31,7 +36,12 @@ export default class GameScene extends Phaser.Scene {
     super("GameScene");
   }
 
-  public preload(): void {}
+  public preload(): void {
+    this.load.spritesheet("keys", "../../assets/sprites/keyboard.png", {
+      frameWidth: 35,
+      frameHeight: 39,
+    });
+  }
 
   public create(): void {
     this.notificationManager = new NotificationManager(this);
