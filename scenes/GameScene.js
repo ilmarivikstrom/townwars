@@ -10,6 +10,8 @@ import { findNodeAtPoint } from "../utils/Math.js";
 import SettingsManager from "../utils/SettingsManager.js";
 import Grid from "../ui/Grid.js";
 import StrengthUI from "../ui/StrengthUI.js";
+import NotificationManager from "../ui/NotificationManager.js";
+import { NotificationType } from "../ui/Notification.js";
 export default class GameScene extends Phaser.Scene {
     constructor() {
         super("GameScene");
@@ -22,6 +24,7 @@ export default class GameScene extends Phaser.Scene {
     }
     preload() { }
     create() {
+        this.notificationManager = new NotificationManager(this);
         this.grid = new Grid(this);
         this.dragIndicator = new DragIndicator(this, 0, 0, 0, 0);
         this.debugUI = new DebugUI(this);
@@ -153,10 +156,12 @@ export default class GameScene extends Phaser.Scene {
         const testCircle = new Phaser.Geom.Circle(x, y, 100); // Try placing with default margin.
         for (const node of this.nodes) {
             if (Phaser.Geom.Intersects.CircleToRectangle(testCircle, node.getBounds())) {
+                this.notificationManager.showNotification("Node not created", `Not enough space`, NotificationType.WARNING);
                 return;
             }
         }
         const newNode = new Node(this, x, y, productionRate, owner);
+        this.notificationManager.showNotification("Node Created", `Production rate ${productionRate}.`, NotificationType.INFO);
         this.nodes.push(newNode);
     }
     deleteNodes() {
@@ -169,6 +174,7 @@ export default class GameScene extends Phaser.Scene {
             edge.destroy();
         }
         this.edges = [];
+        this.notificationManager.showNotification("Nodes cleared", `Enjoy the blank canvas`, NotificationType.INFO);
     }
     updateEdges() {
         for (const edge of this.edges) {

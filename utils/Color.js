@@ -22,6 +22,10 @@ export const Color = {
     DIAMOND: 0xa588f4,
     EDGE_DARK: 0x333344,
     BLACK: 0x000000,
+    WHITE: 0xffffff,
+    INFO: 0x4caf50,
+    WARNING: 0xffc107,
+    ERROR: 0xf44336,
 };
 export const PlayerColor = {
     DEFAULT: 0x3d59a1,

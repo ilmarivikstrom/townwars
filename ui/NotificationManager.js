@@ -1,0 +1,35 @@
+import Notification, { NotificationType } from "../ui/Notification.js";
+import { Config } from "../utils/Config.js";
+export default class NotificationManager {
+    constructor(scene) {
+        this.scene = scene;
+        this.notifications = [];
+        this.spacing = 10;
+        this.notificationHeight = 50;
+    }
+    showNotification(title, message, type = NotificationType.INFO) {
+        const x = Config.WINDOW_WIDTH - 150;
+        const y = Config.WINDOW_HEIGHT - 50;
+        const notification = new Notification(this.scene, x, y, title, message, type);
+        this.notifications.push(notification);
+        this.updatePositions();
+        notification.once("destroy", () => {
+            this.notifications = this.notifications.filter((n) => n !== notification);
+            this.updatePositions();
+        });
+    }
+    updatePositions() {
+        this.notifications.forEach((notification, index) => {
+            const targetY = Config.WINDOW_HEIGHT +
+                (this.notificationHeight + this.spacing) *
+                    (index - this.notifications.length);
+            this.scene.tweens.add({
+                targets: notification,
+                y: targetY,
+                duration: 200,
+                ease: "Power2",
+            });
+        });
+    }
+}
+//# sourceMappingURL=NotificationManager.js.map
