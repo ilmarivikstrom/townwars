@@ -5,11 +5,11 @@ import { ATTACK_STRENGTHS, Layers } from "../utils/Config.js";
 const BUTTON_WIDTH = 60;
 const BUTTON_HEIGHT = 40;
 const TEXT_PADDING = 10;
-const GAP_BETWEEN_TEXT = 0;
 const FONT_FAMILY = "CaskaydiaMono, monospace";
 
 export default class StrengthUI {
   private texts: Phaser.GameObjects.Text[] = [];
+  private title!: Phaser.GameObjects.Text;
   private scene: Phaser.Scene;
 
   constructor(
@@ -21,7 +21,6 @@ export default class StrengthUI {
       buttonWidth?: number;
       buttonHeight?: number;
       padding?: number;
-      gap?: number;
       fontFamily?: string;
       depth?: number;
     } = {}
@@ -31,7 +30,6 @@ export default class StrengthUI {
       buttonWidth = BUTTON_WIDTH,
       buttonHeight = BUTTON_HEIGHT,
       padding = TEXT_PADDING,
-      gap = GAP_BETWEEN_TEXT,
       fontFamily = FONT_FAMILY,
     } = config;
 
@@ -47,11 +45,9 @@ export default class StrengthUI {
       });
       text.setDepth(Layers.UI);
 
-      const totalWidth =
-        ATTACK_STRENGTHS.length * buttonWidth +
-        (ATTACK_STRENGTHS.length - 1) * gap;
-      const startX = x - totalWidth / 2 + buttonWidth / 2;
-      text.setPosition(startX + index * (buttonWidth + gap), y);
+      const totalWidth = ATTACK_STRENGTHS.length * buttonWidth;
+      const startX = x - totalWidth / 2;
+      text.setPosition(startX + index * buttonWidth, y);
 
       text.setInteractive({
         hitArea: new Phaser.Geom.Rectangle(0, 0, text.width, text.height),
@@ -66,6 +62,11 @@ export default class StrengthUI {
 
       this.texts.push(text);
     });
+
+    this.title = scene.add.text(x, y + 55, "Attack strength", {
+      color: toHexColor(Color.TEXT_DEFAULT),
+    });
+    this.title.setOrigin(0.5, 0.5);
 
     this.updateStrengthIndicator(initialStrength);
   }
