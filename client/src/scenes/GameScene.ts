@@ -5,11 +5,13 @@ import DebugUI from "../ui/DebugUI.js";
 import DragIndicator from "../entities/DragIndicator.js";
 import Node from "../entities/Node.js";
 import StatisticsUI from "../ui/StatisticsUI.js";
-import { Color, PlayerColorValue } from "../utils/Color.js";
+import { Color } from "../utils/Color.js";
 import { findNodeAtPoint } from "../utils/Math.js";
 import SettingsManager from "../utils/SettingsManager.js";
 import Grid from "../ui/Grid.js";
 import StrengthUI from "../ui/StrengthUI.js";
+import NotificationManager from "../ui/NotificationManager.js";
+import { NotificationType } from "../ui/Notification.js";
 
 export default class GameScene extends Phaser.Scene {
   private nodes: Node[] = [];
@@ -23,6 +25,7 @@ export default class GameScene extends Phaser.Scene {
   private shiftButtonDown: boolean = false;
   private grid!: Grid;
   private currentStrength = ATTACK_STRENGTHS[1];
+  private notificationManager!: NotificationManager;
 
   public constructor() {
     super("GameScene");
@@ -31,6 +34,7 @@ export default class GameScene extends Phaser.Scene {
   public preload(): void {}
 
   public create(): void {
+    this.notificationManager = new NotificationManager(this);
     this.grid = new Grid(this);
 
     this.dragIndicator = new DragIndicator(this, 0, 0, 0, 0);
@@ -202,10 +206,20 @@ export default class GameScene extends Phaser.Scene {
       if (
         Phaser.Geom.Intersects.CircleToRectangle(testCircle, node.getBounds())
       ) {
+        this.notificationManager.showNotification(
+          "Node not created",
+          `Couldn't fit...`,
+          NotificationType.WARNING
+        );
         return;
       }
     }
     const newNode = new Node(this, x, y, productionRate, owner);
+    this.notificationManager.showNotification(
+      "Node Created",
+      `Production rate ${productionRate}.`,
+      NotificationType.INFO
+    );
     this.nodes.push(newNode);
   }
 
@@ -219,6 +233,11 @@ export default class GameScene extends Phaser.Scene {
       edge.destroy();
     }
     this.edges = [];
+    this.notificationManager.showNotification(
+      "Nodes cleared",
+      `Enjoy the blank canvas`,
+      NotificationType.INFO
+    );
   }
 
   private updateEdges(): void {
