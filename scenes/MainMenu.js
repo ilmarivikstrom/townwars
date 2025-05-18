@@ -58,7 +58,6 @@ export default class MainMenu extends Phaser.Scene {
         button.setDepth(Layers.UI);
         button.setInteractive({
             hitArea: new Phaser.Geom.Rectangle(0, 0, button.width, button.height),
-            // eslint-disable-next-line @typescript-eslint/unbound-method
             hitAreaCallback: Phaser.Geom.Rectangle.Contains,
         });
         button.on("pointerover", () => {

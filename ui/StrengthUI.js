@@ -26,7 +26,6 @@ export default class StrengthUI {
             text.setPosition(startX + index * buttonWidth, y);
             text.setInteractive({
                 hitArea: new Phaser.Geom.Rectangle(0, 0, text.width, text.height),
-                // eslint-disable-next-line @typescript-eslint/unbound-method
                 hitAreaCallback: Phaser.Geom.Rectangle.Contains,
                 draggable: true,
             });
@@ -35,7 +34,7 @@ export default class StrengthUI {
             });
             this.texts.push(text);
         });
-        this.title = scene.add.text(x, y + 55, "Attack strength", {
+        this.title = scene.add.text(x, y + 55, "Move strength", {
             color: toHexColor(Color.TEXT_DEFAULT),
         });
         this.title.setOrigin(0.5, 0.5);
