@@ -2,12 +2,15 @@ import Phaser from "phaser";
 import { Color, toHexColor } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
 import Grid from "../ui/Grid.js";
+import { GameLogic } from "game-logic";
 export default class MainMenu extends Phaser.Scene {
     constructor() {
         super("MainMenu");
     }
     preload() { }
     create() {
+        const logic = new GameLogic();
+        console.log(logic.dummy());
         this.serverIndicator = this.createServerIndicator();
         this.add.existing(this.serverIndicator);
         this.socketManager = this.registry.get("socketManager");
