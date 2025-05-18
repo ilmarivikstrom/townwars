@@ -1,7 +1,7 @@
 import { DisconnectReason, Server, Socket } from "socket.io";
 import { SQLiteService, initDB } from "./db/sqlite.js";
-
-import { config } from "./config.js";
+import { GameLogic } from "game-logic";
+import { Config } from "./config.js";
 
 const port = 3000;
 
@@ -11,7 +11,7 @@ const ioServer = new Server(port, {
   },
 });
 
-const db = initDB(config.dbFile);
+const db = initDB(Config.dbFile);
 
 function checkUser(userID: string) {
   console.log("Checking user...");
@@ -41,3 +41,5 @@ ioServer.on("connection", (socket: Socket) => {
 });
 
 console.log(`Server running at http://localhost:${port}`);
+const logic = new GameLogic();
+console.log(logic.dummy());

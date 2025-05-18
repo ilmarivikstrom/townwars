@@ -3,6 +3,7 @@ import { Color, toHexColor } from "../utils/Color.js";
 import { Config, Layers } from "../utils/Config.js";
 import Grid from "../ui/Grid.js";
 import { SocketManager } from "../networking/SocketManager.js";
+import { GameLogic } from "game-logic";
 
 export default class MainMenu extends Phaser.Scene {
   private socketManager!: SocketManager;
@@ -19,6 +20,8 @@ export default class MainMenu extends Phaser.Scene {
   public preload() {}
 
   public create() {
+    const logic = new GameLogic();
+    console.log(logic.dummy());
     this.serverIndicator = this.createServerIndicator();
     this.add.existing(this.serverIndicator);
 

@@ -8,8 +8,12 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "moduleResolution": "node",
-    "lib": ["dom", "esnext", "ScriptHost"]
+    "lib": ["dom", "esnext", "ScriptHost"],
+    "baseUrl": ".",
+    "paths": {
+      "game-logic": ["../shared/src"]
+    }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../shared/src/**/*"],
   "exclude": ["node_modules"]
 }

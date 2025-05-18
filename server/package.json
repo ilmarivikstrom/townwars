@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "nodemon",
+    "dev": "nodemon --watch ../shared/src --exec \"npm run build && node dist/index.js\"",
     "build": "tsc",
     "debug": "node --inspect-brk -r ts-node/register index.ts"
   },
