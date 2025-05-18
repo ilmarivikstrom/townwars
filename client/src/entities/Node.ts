@@ -61,7 +61,6 @@ export default class Node extends Phaser.GameObjects.Arc {
         this.height / 2,
         this.radius
       ),
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       hitAreaCallback: Phaser.Geom.Circle.Contains,
       draggable: true,
     });
