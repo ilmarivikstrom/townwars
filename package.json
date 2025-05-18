@@ -2,8 +2,8 @@
   "name": "townwars-full-bundle",
   "version": "0.0.0",
   "scripts": {
-    "start:client": "cd client && npm run dev",
-    "start:server": "cd server && npm run dev",
+    "start:client": "concurrently \"cd shared && npm run watch\" \"cd client && npm run dev\"",
+    "start:server": "concurrently \"cd shared && npm run watch\" \"cd server && npm run dev\"",
     "start": "concurrently \"cd shared && npm run watch\" \"npm run start:server\" \"npm run start:client\"",
     "debug:server": "cd server && npm run debug",
     "build:client": "cd client && npm run build",
