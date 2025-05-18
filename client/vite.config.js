@@ -4,7 +4,7 @@ import path from "path";
 export default defineConfig({
   resolve: {
     alias: {
-      "game-logic": path.resolve(__dirname, "../shared/src"),
+      "game-logic": path.resolve(__dirname, "../shared/dist"),
     },
   },
   server: {
@@ -13,6 +13,7 @@ export default defineConfig({
       usePolling: true,
       disableGlobbing: false,
       ignored: ["**/node_modules/**", "**/.git/**"],
+      include: [path.resolve(__dirname, "../shared/src/**/*")],
     },
   },
   build: {

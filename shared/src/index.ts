@@ -1,5 +1,8 @@
 export class GameLogic {
   public dummy(): string {
-    return "this date is from the shared lib: " + new Date().toDateString();
+    return (
+      "This date is from the shared lib! Date when calling gamelogic: " +
+      new Date().toDateString()
+    );
   }
 }

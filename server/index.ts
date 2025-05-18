@@ -1,5 +1,5 @@
 import { DisconnectReason, Server, Socket } from "socket.io";
-import { SQLiteService, initDB } from "./db/sqlite.js";
+import { initDB } from "./db/sqlite.js";
 import { GameLogic } from "game-logic";
 import { Config } from "./config.js";
 

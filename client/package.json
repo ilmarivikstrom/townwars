@@ -20,6 +20,7 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
+    "game-logic": "file:../shared",
     "@vitejs/plugin-basic-ssl": "^2.0.0",
     "phaser": "^3.88.2",
     "socket.io": "^4.8.1",
