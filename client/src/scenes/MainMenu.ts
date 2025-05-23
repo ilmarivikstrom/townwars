@@ -4,10 +4,13 @@ import { Config, Layers } from "../utils/Config.js";
 import Grid from "../ui/Grid.js";
 import { SocketManager } from "../networking/SocketManager.js";
 import { GameLogic } from "game-logic";
+import SocketUI from "../ui/SocketUI.js";
+import TitleText from "../ui/TitleText.js";
 
 export default class MainMenu extends Phaser.Scene {
   private socketManager!: SocketManager;
-  private serverIndicator!: Phaser.GameObjects.Text;
+  private socketUI!: SocketUI;
+  private titleText!: TitleText;
   private startGameButton!: Phaser.GameObjects.Text;
   private mapEditorButton!: Phaser.GameObjects.Text;
   private settingsButton!: Phaser.GameObjects.Text;
@@ -22,14 +25,44 @@ export default class MainMenu extends Phaser.Scene {
   public create() {
     const logic = new GameLogic();
     console.log(logic.dummy());
-    this.serverIndicator = this.createServerIndicator();
-    this.add.existing(this.serverIndicator);
+    this.socketUI = new SocketUI(
+      this,
+      Config.PADDING_ELEMENTS,
+      Config.PADDING_ELEMENTS,
+      { x: Config.PADDING_TEXT, y: Config.PADDING_TEXT }
+    );
+
+    this.titleText = new TitleText(this);
 
     this.socketManager = this.registry.get("socketManager");
-    this.socketManager.on("connect", this.updateServerIndicator, this);
-    this.socketManager.on("disconnect", this.updateServerIndicator, this);
-    this.socketManager.on("connect_error", this.updateServerIndicator, this);
-    this.socketManager.on("pong", this.updateServerIndicator, this);
+
+    this.socketManager.on("connect", () => {
+      this.socketUI.update(
+        this.socketManager.isConnected(),
+        this.socketManager.getRoundTripTime()
+      );
+    });
+
+    this.socketManager.on("disconnect", () => {
+      this.socketUI.update(
+        this.socketManager.isConnected(),
+        this.socketManager.getRoundTripTime()
+      );
+    });
+
+    this.socketManager.on("connect_error", () => {
+      this.socketUI.update(
+        this.socketManager.isConnected(),
+        this.socketManager.getRoundTripTime()
+      );
+    });
+
+    this.socketManager.on("pong", () => {
+      this.socketUI.update(
+        this.socketManager.isConnected(),
+        this.socketManager.getRoundTripTime()
+      );
+    });
 
     this.grid = new Grid(this);
 
@@ -58,14 +91,6 @@ export default class MainMenu extends Phaser.Scene {
       }
     });
     this.add.existing(this.settingsButton);
-  }
-
-  private updateServerIndicator(): void {
-    const isConnected = this.socketManager.isConnected();
-    const text = isConnected
-      ? `🟢 Connected (${this.socketManager.getRoundTripTime()}ms)`
-      : "🔴 Offline";
-    this.serverIndicator.setText(text);
   }
 
   private createButton(text: string, yOffset: number): Phaser.GameObjects.Text {
@@ -99,29 +124,6 @@ export default class MainMenu extends Phaser.Scene {
     });
 
     return button;
-  }
-
-  private createServerIndicator(): Phaser.GameObjects.Text {
-    const serverIndicator = new Phaser.GameObjects.Text(
-      this,
-      Config.PADDING_ELEMENTS,
-      Config.PADDING_ELEMENTS,
-      "🟡 Connecting...",
-      {
-        backgroundColor: toHexColor(Color.TOOLTIP_BACKGROUND),
-        color: toHexColor(Color.TEXT_DEFAULT),
-        padding: { x: Config.PADDING_TEXT, y: Config.PADDING_TEXT },
-        fontFamily: "CaskaydiaMono",
-      }
-    );
-    return serverIndicator;
-  }
-
-  public shutdown(): void {
-    this.socketManager.off("connect", this.updateServerIndicator, this);
-    this.socketManager.off("disconnect", this.updateServerIndicator, this);
-    this.socketManager.off("connect_error", this.updateServerIndicator, this);
-    this.socketManager.off("pong", this.updateServerIndicator, this);
   }
 
   public update(): void {}
